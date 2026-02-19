@@ -62,7 +62,7 @@ export function AboutPreview() {
         >
           <div className="glass-card rounded-2xl p-8 space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-teal/[0.06] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl neo-icon flex items-center justify-center">
                 <span className="text-teal-light/80 text-lg font-heading font-bold">01</span>
               </div>
               <div>
@@ -71,7 +71,7 @@ export function AboutPreview() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-teal/[0.06] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl neo-icon flex items-center justify-center">
                 <span className="text-teal-light/80 text-lg font-heading font-bold">02</span>
               </div>
               <div>
@@ -80,7 +80,7 @@ export function AboutPreview() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gold/[0.06] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl neo-icon-gold flex items-center justify-center">
                 <span className="text-gold/80 text-lg font-heading font-bold">03</span>
               </div>
               <div>

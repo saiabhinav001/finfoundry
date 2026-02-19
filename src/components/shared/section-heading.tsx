@@ -24,7 +24,7 @@ export function SectionHeading({
           initial="hidden"
           whileInView="visible"
           viewport={viewport}
-          className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase text-gold/90 bg-gold/[0.06] rounded-full mb-6 border border-gold/[0.1]"
+          className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase text-gold/90 glass-badge-gold rounded-full mb-6"
         >
           {badge}
         </motion.span>

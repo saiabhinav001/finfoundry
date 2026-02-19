@@ -32,8 +32,17 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="border-t border-white/[0.03] bg-[#030610]">
-      <div className="container-max py-12 md:py-16 lg:py-20">
+    <footer className="relative border-t border-white/[0.04] bg-[#030610] overflow-hidden">
+      {/* Subtle aurora glow at top */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[200px] pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse 80% 100% at 50% 0%, rgba(16,185,129,0.025) 0%, transparent 70%)",
+        }}
+      />
+      <div className="gradient-divider" />
+
+      <div className="relative container-max py-12 md:py-16 lg:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-10">
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-3 mb-5 group">
@@ -58,7 +67,7 @@ export function Footer() {
                 href={links.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center text-muted-foreground hover:text-teal-light hover:bg-teal/[0.08] transition-all duration-200"
+                className="w-9 h-9 rounded-lg neo-icon flex items-center justify-center text-muted-foreground hover:text-teal-light transition-all duration-200"
                 aria-label="Instagram"
               >
                 <FaInstagram className="w-3.5 h-3.5" />
@@ -67,14 +76,14 @@ export function Footer() {
                 href={links.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center text-muted-foreground hover:text-teal-light hover:bg-teal/[0.08] transition-all duration-200"
+                className="w-9 h-9 rounded-lg neo-icon flex items-center justify-center text-muted-foreground hover:text-teal-light transition-all duration-200"
                 aria-label="LinkedIn"
               >
                 <FaLinkedinIn className="w-3.5 h-3.5" />
               </a>
               <a
                 href={`mailto:${links.email}`}
-                className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center text-muted-foreground hover:text-teal-light hover:bg-teal/[0.08] transition-all duration-200"
+                className="w-9 h-9 rounded-lg neo-icon flex items-center justify-center text-muted-foreground hover:text-teal-light transition-all duration-200"
                 aria-label="Email"
               >
                 <HiOutlineMail className="w-3.5 h-3.5" />
@@ -135,13 +144,16 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 md:mt-16 md:pt-8 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-10 pt-6 md:mt-16 md:pt-8 border-t border-white/[0.04]">
+          <div className="gradient-divider mb-6" />
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground/70">
             &copy; 2026 CBIT FinFoundry. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground/70">
             Built with precision by FinFoundry Tech Team
           </p>
+          </div>
         </div>
       </div>
     </footer>

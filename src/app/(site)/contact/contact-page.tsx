@@ -117,7 +117,7 @@ export function ContactPage() {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="Your name"
-                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/60 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"
+                    className="w-full px-4 py-3 rounded-xl glass-input text-sm"
                   />
                 </div>
                 <div>
@@ -134,7 +134,7 @@ export function ContactPage() {
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     placeholder="you@example.com"
-                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/60 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"
+                    className="w-full px-4 py-3 rounded-xl glass-input text-sm"
                   />
                 </div>
               </div>
@@ -153,7 +153,7 @@ export function ContactPage() {
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
                   placeholder="What's this about?"
-                  className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/60 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"
+                  className="w-full px-4 py-3 rounded-xl glass-input text-sm"
                 />
               </div>
 
@@ -171,14 +171,14 @@ export function ContactPage() {
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   placeholder="Tell us more..."
-                  className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/60 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors resize-none"
+                  className="w-full px-4 py-3 rounded-xl glass-input text-sm resize-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold rounded-xl bg-gold text-background hover:bg-gold-light hover:-translate-y-px transition-all duration-[220ms] shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_1px_2px_rgba(0,0,0,0.25),0_4px_12px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.25),0_6px_16px_rgba(0,0,0,0.2)] w-full sm:w-auto disabled:opacity-50"
+                className="btn-primary w-full sm:w-auto disabled:opacity-50"
               >
                 {submitting ? "Sending..." : "Send Message"}
               </button>
@@ -194,7 +194,7 @@ export function ContactPage() {
 
               <div className="space-y-5">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-teal/[0.06] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl neo-icon flex items-center justify-center shrink-0">
                     <HiOutlineMail className="w-4.5 h-4.5 text-teal-light/80" />
                   </div>
                   <div>
@@ -209,7 +209,7 @@ export function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-teal/[0.06] flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl neo-icon flex items-center justify-center shrink-0">
                     <HiOutlineLocationMarker className="w-4.5 h-4.5 text-teal-light/80" />
                   </div>
                   <div>
@@ -238,7 +238,7 @@ export function ContactPage() {
                   href={links.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm text-foreground hover:bg-teal/[0.06] hover:border-teal/[0.12] transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-input text-sm text-foreground hover:border-teal/30 transition-all duration-200"
                 >
                   <FaInstagram className="w-4 h-4" />
                   Instagram
@@ -247,7 +247,7 @@ export function ContactPage() {
                   href={links.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm text-foreground hover:bg-teal/[0.06] hover:border-teal/[0.12] transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-input text-sm text-foreground hover:border-teal/30 transition-all duration-200"
                 >
                   <FaLinkedinIn className="w-4 h-4" />
                   LinkedIn
@@ -264,7 +264,7 @@ export function ContactPage() {
                 Follow us on social media for announcements.
               </p>
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-teal-light/60" />
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-light/60 shadow-[0_0_6px_rgba(16,185,129,0.4)]" />
                 <span className="text-xs text-teal-light/80 font-medium">
                   Applications Open
                 </span>

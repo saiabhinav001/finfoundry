@@ -34,7 +34,41 @@ export function HeroSection() {
       {/* Fine dot grid for depth */}
       <div className="absolute inset-0 grid-pattern opacity-60" />
 
-      {/* Soft top-center radial — barely visible, just enough depth */}
+      {/* Floating aurora orbs */}
+      <div
+        className="floating-orb"
+        style={{
+          width: "clamp(300px, 40vw, 600px)",
+          height: "clamp(300px, 40vw, 600px)",
+          top: "10%",
+          left: "-5%",
+          background: "radial-gradient(circle, rgba(16,185,129,0.07) 0%, transparent 70%)",
+        }}
+      />
+      <div
+        className="floating-orb-sm"
+        style={{
+          width: "clamp(200px, 30vw, 450px)",
+          height: "clamp(200px, 30vw, 450px)",
+          bottom: "15%",
+          right: "-3%",
+          background: "radial-gradient(circle, rgba(245,197,66,0.04) 0%, transparent 70%)",
+          animationDelay: "4s",
+        }}
+      />
+      <div
+        className="floating-orb-sm"
+        style={{
+          width: "clamp(150px, 20vw, 300px)",
+          height: "clamp(150px, 20vw, 300px)",
+          top: "60%",
+          left: "20%",
+          background: "radial-gradient(circle, rgba(16,185,129,0.04) 0%, transparent 70%)",
+          animationDelay: "7s",
+        }}
+      />
+
+      {/* Soft top-center radial */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[min(1200px,100vw)] h-[600px] pointer-events-none"
         style={{
@@ -50,9 +84,9 @@ export function HeroSection() {
         initial="hidden"
         animate={heroReady ? "show" : "hidden"}
       >
-        {/* Badge */}
+        {/* Badge — glassmorphism */}
         <motion.div variants={fadeUp}>
-          <span className="inline-flex items-center px-5 py-2 text-xs font-semibold tracking-[0.2em] uppercase text-teal-light/80 bg-teal/[0.06] rounded-full mb-6 sm:mb-8 border border-teal/[0.1]">
+          <span className="glass-badge inline-flex items-center px-5 py-2 text-xs font-semibold tracking-[0.2em] uppercase text-teal-light/90 rounded-full mb-6 sm:mb-8">
             CBIT Hyderabad
           </span>
         </motion.div>
@@ -67,11 +101,11 @@ export function HeroSection() {
           <span className="text-gradient">Financial Edge</span>
         </motion.h1>
 
-        {/* Decorative rule */}
+        {/* Decorative gradient rule */}
         <motion.div
-          className="mx-auto mt-5 sm:mt-6 h-px bg-gradient-to-r from-transparent via-teal/25 to-transparent"
+          className="mx-auto mt-5 sm:mt-6 gradient-divider"
           initial={{ width: 0, opacity: 0 }}
-          animate={heroReady ? { width: 160, opacity: 1 } : { width: 0, opacity: 0 }}
+          animate={heroReady ? { width: 180, opacity: 1 } : { width: 0, opacity: 0 }}
           transition={{
             duration: 1,
             delay: heroReady ? 0.65 : 0,
@@ -89,21 +123,21 @@ export function HeroSection() {
           generation of leaders.
         </motion.p>
 
-        {/* CTA buttons */}
+        {/* CTA buttons — premium glass style */}
         <motion.div
           variants={fadeUp}
           className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Link
             href="/contact"
-            className="group inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-xl bg-gold text-background hover:bg-gold-light transition-all duration-300 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.2)] hover:shadow-[0_2px_6px_rgba(0,0,0,0.3),0_8px_24px_rgba(245,197,66,0.18)] hover:-translate-y-0.5"
+            className="group btn-primary inline-flex items-center gap-2 px-8 py-3.5 text-sm rounded-xl"
           >
             Join FinFoundry
             <HiArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
           </Link>
           <Link
             href="/programs"
-            className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-xl border border-white/[0.08] text-foreground hover:bg-white/[0.03] hover:border-teal/15 hover:-translate-y-0.5 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.06)]"
+            className="btn-ghost inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-xl text-foreground"
           >
             Explore Programs
           </Link>

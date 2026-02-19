@@ -7,20 +7,41 @@ import { fadeUp, viewport } from "@/lib/motion";
 
 export function JoinCTA() {
   return (
-    <section className="relative overflow-hidden py-20 md:py-28 lg:py-36 bg-surface">
+    <section className="relative overflow-hidden py-20 md:py-28 lg:py-36 bg-aurora">
+      {/* Aurora floating orbs */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-teal/[0.018] blur-[220px]" />
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] rounded-full bg-gold/[0.008] blur-[200px]" />
+        <div
+          className="floating-orb"
+          style={{
+            width: "clamp(250px, 40vw, 500px)",
+            height: "clamp(250px, 40vw, 500px)",
+            top: "20%",
+            left: "-10%",
+            background: "radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="floating-orb-sm"
+          style={{
+            width: "clamp(200px, 30vw, 400px)",
+            height: "clamp(200px, 30vw, 400px)",
+            bottom: "10%",
+            right: "-5%",
+            background: "radial-gradient(circle, rgba(245,197,66,0.035) 0%, transparent 70%)",
+            animationDelay: "5s",
+          }}
+        />
       </div>
 
-      <div className="relative z-10 container-max text-center">
+      <div className="relative z-10 container-max">
         <motion.div
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
           viewport={viewport}
+          className="glass-cta rounded-3xl px-8 py-14 sm:px-12 sm:py-16 lg:px-16 lg:py-20 text-center"
         >
-          <span className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase text-gold/90 bg-gold/[0.06] rounded-full mb-6 border border-gold/[0.1]">
+          <span className="glass-badge-gold inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase text-gold/90 rounded-full mb-6">
             Ready to Start?
           </span>
           <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold tracking-[-0.025em] leading-[1.1] max-w-3xl mx-auto">
@@ -35,14 +56,14 @@ export function JoinCTA() {
           <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-xl bg-gold text-background hover:bg-gold-light hover:-translate-y-0.5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_1px_3px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.2)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.3),0_8px_24px_rgba(245,197,66,0.15)] hover:brightness-105"
+              className="btn-primary inline-flex items-center gap-2 px-8 py-3.5 text-sm rounded-xl"
             >
               Join FinFoundry
               <HiArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/about"
-              className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-xl border border-white/[0.08] text-foreground hover:bg-white/[0.03] hover:border-emerald-500/20 hover:-translate-y-0.5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:shadow-[0_0_20px_rgba(16,185,129,0.06)]"
+              className="btn-ghost inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-xl text-foreground"
             >
               Learn More
             </Link>

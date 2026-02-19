@@ -72,9 +72,9 @@ export function Navbar() {
         initial={{ opacity: 0, y: -16 }}
         animate={navReady ? { opacity: 1, y: 0 } : { opacity: 0, y: -16 }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "glass py-3 shadow-[0_1px_0_rgba(255,255,255,0.02),0_1px_3px_rgba(0,0,0,0.25),0_4px_20px_rgba(0,0,0,0.15)]"
+            ? "glass py-3"
             : "bg-transparent py-5"
         }`}
       >
@@ -128,7 +128,7 @@ export function Navbar() {
               <div ref={profileRef} className="relative">
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center gap-2 rounded-full p-0.5 pr-3 border border-white/[0.08] hover:border-white/[0.16] bg-white/[0.03] hover:bg-white/[0.06] transition-all duration-200"
+                  className="flex items-center gap-2 rounded-full p-0.5 pr-3 border border-white/[0.08] hover:border-teal/[0.15] bg-white/[0.03] hover:bg-white/[0.05] backdrop-blur-sm transition-all duration-300 hover:shadow-[0_0_20px_-4px_rgba(16,185,129,0.1)]"
                 >
                   {user.photoURL ? (
                     <Image
@@ -164,7 +164,7 @@ export function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.97 }}
                       transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-white/[0.08] bg-surface/95 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4),0_1px_0_rgba(255,255,255,0.02)_inset] overflow-hidden"
+                      className="absolute right-0 top-full mt-2 w-64 rounded-2xl border border-white/[0.08] bg-[rgba(7,10,26,0.90)] backdrop-blur-2xl shadow-[0_8px_40px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.03),inset_0_1px_0_rgba(255,255,255,0.04)] overflow-hidden"
                     >
                       {/* User info */}
                       <div className="px-4 py-3.5 border-b border-white/[0.06]">
@@ -230,7 +230,7 @@ export function Navbar() {
                 </a>
                 <a
                   href="/login?mode=register"
-                  className="inline-flex items-center justify-center px-5 py-2 text-[13px] font-semibold rounded-lg bg-gold text-background hover:bg-gold-light hover:-translate-y-0.5 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_1px_2px_rgba(0,0,0,0.3),0_3px_8px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_2px_3px_rgba(0,0,0,0.3),0_6px_16px_rgba(245,197,66,0.12)] hover:brightness-105"
+                  className="btn-primary inline-flex items-center justify-center px-5 py-2 text-[13px] rounded-lg"
                 >
                   Join FinFoundry
                 </a>
@@ -278,7 +278,7 @@ export function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-              className="absolute right-0 top-0 bottom-0 w-[280px] sm:w-[300px] bg-surface border-l border-white/[0.04] flex flex-col"
+              className="absolute right-0 top-0 bottom-0 w-[280px] sm:w-[300px] bg-[rgba(5,8,22,0.92)] backdrop-blur-2xl border-l border-white/[0.06] flex flex-col shadow-[-8px_0_40px_rgba(0,0,0,0.4)]"
             >
               {/* Mobile nav links — pt-20 clears navbar height cleanly */}
               <div className="flex-1 overflow-y-auto px-4 pt-20 pb-4">

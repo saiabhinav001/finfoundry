@@ -159,7 +159,7 @@ export function AboutPage() {
               variants={fadeUp}
               className="glass-card rounded-2xl p-7"
             >
-              <div className="w-10 h-10 rounded-xl bg-teal/[0.06] flex items-center justify-center mb-5">
+              <div className="w-10 h-10 rounded-xl neo-icon flex items-center justify-center mb-5">
                 <span className="text-teal-light/80 font-heading font-bold text-sm">
                   0{i + 1}
                 </span>
@@ -196,7 +196,7 @@ export function AboutPage() {
               className="flex gap-6 relative pb-8 last:pb-0"
             >
               <div className="flex flex-col items-center">
-                <div className="w-2.5 h-2.5 rounded-full bg-teal-light/70 shrink-0 mt-1.5" />
+                <div className="w-2.5 h-2.5 rounded-full bg-teal-light/70 shrink-0 mt-1.5 shadow-[0_0_8px_rgba(16,185,129,0.3)]" />
                 <div className="w-px flex-1 bg-white/[0.06] mt-2" />
               </div>
               <div>

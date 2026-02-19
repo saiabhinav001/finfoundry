@@ -61,7 +61,7 @@ export function ResourcesPage() {
               viewport={viewport}
               className="flex items-center gap-3 mb-10"
             >
-              <div className="w-10 h-10 rounded-xl bg-teal/[0.06] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl neo-icon flex items-center justify-center">
                 <Icon className="w-5 h-5 text-teal-light/80" />
               </div>
               <h2 className="font-heading font-bold text-2xl tracking-[-0.02em] text-foreground">

@@ -22,6 +22,29 @@ export function PageHero({ badge, title, description }: PageHeroProps) {
       {/* Fine dot grid */}
       <div className="absolute inset-0 grid-pattern opacity-40" />
 
+      {/* Floating aurora orbs */}
+      <div
+        className="floating-orb"
+        style={{
+          width: "clamp(250px, 35vw, 500px)",
+          height: "clamp(250px, 35vw, 500px)",
+          top: "5%",
+          right: "-8%",
+          background: "radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%)",
+        }}
+      />
+      <div
+        className="floating-orb-sm"
+        style={{
+          width: "clamp(180px, 25vw, 350px)",
+          height: "clamp(180px, 25vw, 350px)",
+          bottom: "10%",
+          left: "-5%",
+          background: "radial-gradient(circle, rgba(245,197,66,0.03) 0%, transparent 70%)",
+          animationDelay: "6s",
+        }}
+      />
+
       {/* Subtle top-edge glow — barely perceptible */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] pointer-events-none"
@@ -37,7 +60,7 @@ export function PageHero({ badge, title, description }: PageHeroProps) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1, ease }}
-          className="inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase text-teal-light/80 bg-teal/[0.06] rounded-full mb-5 border border-teal/[0.1]"
+          className="glass-badge inline-block px-4 py-1.5 text-xs font-semibold tracking-widest uppercase text-teal-light/90 rounded-full mb-5"
         >
           {badge}
         </motion.span>

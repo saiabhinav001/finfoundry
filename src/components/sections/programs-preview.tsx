@@ -61,7 +61,7 @@ export function ProgramsPreview() {
               variants={fadeUp}
               className="group glass-card rounded-2xl p-7 transition-all duration-[250ms] ease-out hover:-translate-y-1"
             >
-              <div className="w-11 h-11 rounded-xl bg-teal/[0.06] flex items-center justify-center mb-5 group-hover:bg-teal/[0.1] transition-colors duration-250">
+              <div className="w-11 h-11 rounded-xl neo-icon flex items-center justify-center mb-5">
                 <Icon className="w-5 h-5 text-teal-light/80" />
               </div>
               <h3 className="font-heading font-semibold text-[17px] text-foreground mb-2 tracking-[-0.01em]">

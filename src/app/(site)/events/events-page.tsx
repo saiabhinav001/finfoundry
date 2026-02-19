@@ -59,10 +59,8 @@ export function EventsPage() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 capitalize ${
-                  filter === f
-                    ? "bg-teal/[0.08] text-teal-light border border-teal/[0.12]"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.03] border border-transparent"
+                className={`filter-pill capitalize ${
+                  filter === f ? "filter-pill-active" : ""
                 }`}
               >
                 {f}
@@ -150,7 +148,7 @@ export function EventsPage() {
                     href={event.registrationLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-lg text-xs font-semibold bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20 transition-all duration-200"
+                    className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-lg text-xs font-semibold btn-primary"
                   >
                     <ExternalLink className="w-3 h-3" />
                     Register Now

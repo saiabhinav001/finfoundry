@@ -90,8 +90,8 @@ export function TeamPage() {
                 onClick={() => setActiveBatch(batch)}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                   activeBatch === batch
-                    ? "bg-teal text-white shadow-lg shadow-teal/20"
-                    : "bg-white/[0.04] text-muted-foreground hover:text-foreground hover:bg-white/[0.08] border border-white/[0.06]"
+                    ? "filter-pill filter-pill-active"
+                    : "filter-pill"
                 }`}
               >
                 Batch {batch}
@@ -121,7 +121,7 @@ export function TeamPage() {
             animate="visible"
             className="glass-card rounded-2xl p-12 text-center max-w-lg mx-auto"
           >
-            <div className="w-16 h-16 rounded-2xl bg-teal/[0.06] flex items-center justify-center mx-auto mb-5">
+            <div className="w-16 h-16 rounded-2xl neo-icon flex items-center justify-center mx-auto mb-5">
               <Users className="w-7 h-7 text-teal-light/50" />
             </div>
             <h3 className="font-heading font-semibold text-lg text-foreground mb-2">
@@ -180,7 +180,7 @@ export function TeamPage() {
                         className="group glass-card rounded-2xl p-5 text-center hover:border-teal/[0.15] transition-colors duration-250"
                       >
                         {/* Avatar */}
-                        <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-4 border border-white/[0.08] group-hover:border-teal/[0.2] transition-colors duration-250">
+                        <div className="relative mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-4 border border-white/[0.08] group-hover:border-teal/[0.2] group-hover:shadow-[0_0_15px_-3px_rgba(16,185,129,0.15)] transition-all duration-250">
                           {member.image ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -223,7 +223,7 @@ export function TeamPage() {
                             href={member.linkedin}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-[11px] text-muted-foreground hover:text-teal-light bg-white/[0.03] hover:bg-teal/[0.06] border border-white/[0.06] hover:border-teal/[0.15] transition-all sm:hidden"
+                            className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-[11px] text-muted-foreground hover:text-teal-light glass-input hover:border-teal/[0.15] transition-all sm:hidden"
                           >
                             <FaLinkedinIn className="w-3 h-3" />
                             LinkedIn

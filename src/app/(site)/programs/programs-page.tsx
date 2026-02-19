@@ -83,7 +83,7 @@ export function ProgramsPage() {
                 className="group glass-card rounded-2xl p-8 transition-all duration-[250ms] ease-out hover:-translate-y-1"
               >
                 <div className="flex items-start gap-5">
-                  <div className="w-12 h-12 rounded-xl bg-teal/[0.06] flex items-center justify-center shrink-0 group-hover:bg-teal/[0.1] transition-colors duration-250">
+                  <div className="w-12 h-12 rounded-xl neo-icon flex items-center justify-center shrink-0">
                     <Icon className="w-5 h-5 text-teal-light/80" />
                   </div>
                   <div>
@@ -119,7 +119,7 @@ export function ProgramsPage() {
             <motion.div
               key={outcome}
               variants={fadeUp}
-              className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.03]"
+              className="flex items-start gap-3 p-4 rounded-xl glass-card"
             >
               <CheckCircle2 className="w-4.5 h-4.5 text-teal-light/70 shrink-0 mt-0.5" />
               <span className="text-sm text-foreground/90">{outcome}</span>
