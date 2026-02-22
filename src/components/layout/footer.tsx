@@ -47,7 +47,7 @@ export function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-3 mb-5 group">
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="FinFoundry"
                 width={120}
                 height={150}

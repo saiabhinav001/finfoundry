@@ -621,6 +621,19 @@
   100% { transform: translateX(100%); }
 }
 
+/* ─── Brand entrance — ambient mesh drift ────────────────────── */
+@keyframes entrance-mesh-drift {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 50% 0%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 100%; }
+}
+
+@keyframes entrance-glow-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.15); }
+}
+
 /* ─── Filter tab pill styling ─────────────────────────────────── */
 .filter-pill {
   position: relative;

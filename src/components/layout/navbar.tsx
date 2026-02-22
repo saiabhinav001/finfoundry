@@ -83,7 +83,7 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
             <span data-nav-logo className="inline-flex shrink-0">
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="FinFoundry"
                 width={120}
                 height={150}
