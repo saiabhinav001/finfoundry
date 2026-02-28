@@ -59,7 +59,7 @@ export function EventsPage() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`filter-pill capitalize ${
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 filter-pill capitalize ${
                   filter === f ? "filter-pill-active" : ""
                 }`}
               >

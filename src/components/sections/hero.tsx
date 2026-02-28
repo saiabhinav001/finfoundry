@@ -16,16 +16,16 @@ export function HeroSection() {
   const container = {
     hidden: {},
     show: {
-      transition: { staggerChildren: 0.14, delayChildren: 0.1 },
+      transition: { staggerChildren: 0.06, delayChildren: 0.05 },
     },
   };
 
   const fadeUp = {
-    hidden: { opacity: 0, y: prefersReduced ? 0 : 28 },
+    hidden: { opacity: 0, y: prefersReduced ? 0 : 20 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const },
+      transition: { duration: 0.7, ease: [0.4, 0, 0.2, 1] as const },
     },
   };
 

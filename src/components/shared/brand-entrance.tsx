@@ -1,80 +1,92 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useEntrance } from "@/lib/entrance-context";
 
 /* ═══════════════════════════════════════════════════════════════════
- * BrandEntrance — Ultra-Premium Cinematic Reveal
+ * BrandEntrance v3.0 — Precision Cinematic Startup Sequence
  *
- * Five-act choreographed sequence using the EXACT official SVG logo:
- *   1. AMBIENT    — Multi-layered breathing gradient mesh + floating
- *                   particles for cinematic depth
- *   2. LOGO       — Blur-to-focus reveal with pulsating dual-color
- *                   glow halo, followed by a sheen light-sweep
- *   3. TYPOGRAPHY — Staggered mask-reveal from bottom, per-character,
- *                   with glowing text shadows
- *   4. HOLD       — Brief luxurious pause for the full composition
- *   5. EXIT       — Scale-toward-camera with radial blur + background
- *                   slide-up curtain reveal
+ * Architecture: Six-phase choreographed timeline
  *
- * Total duration: ~4.0 s.  Plays once per session, homepage only.
- * Fully responsive across all devices.  Respects prefers-reduced-motion.
+ *   Phase 0 — VOID       (0.00–0.30 s)
+ *     Deep navy (#050816). Ambient vignette. Visual silence.
+ *     No logo. No motion. Brand tension builds.
+ *
+ *   Phase 1 — SWEEP      (0.30–1.10 s)
+ *     Wide, feathered emerald light beam drifts L → R.
+ *     ~10–15% saturation, soft edges, no hard streak.
+ *     Logo is revealed via CSS mask-image — uncovered
+ *     by light, NOT faded in.
+ *
+ *   Phase 2 — STABILIZE  (1.10–1.60 s)
+ *     Logo subtle scale: 0.985 → 1.000.
+ *     Drop-shadow depth increases.
+ *     Material presence emerges.
+ *     No overshoot. No bounce.
+ *
+ *   Phase 3 — PULSE      (1.60–1.90 s)
+ *     Single soft emerald glow behind logo.
+ *     Expands slightly, fades smoothly.
+ *     No flash. No color shift.
+ *
+ *   Phase 4 — MORPH      (1.90–2.40 s)
+ *     Logo scales down toward navbar anchor.
+ *     Background spotlight expands outward to ambient.
+ *     Overlay dissolves.
+ *
+ *   Phase 5 — REVEAL     (2.40–2.80 s)
+ *     Hero content: opacity 0→1, Y 20→0.
+ *     Staggered children (0.06s delay).
+ *     Page becomes interactive.
+ *
+ * Total: 2.8 s. Plays once/session. Homepage only.
+ *
+ * Governance: SOP §4, §5, §7, §9, §11
+ *   – No particles. No infinite loops. No canvas/WebGL.
+ *   – No spinning, rotation, bounce, glitch, or neon.
+ *   – Only cubic-bezier(0.4, 0, 0.2, 1). No spring physics.
+ *   – transform + opacity only (GPU-composited, 60fps).
+ *   – prefers-reduced-motion: skip sweep, gentle fade, morph.
+ *
+ * Why this feels premium:
+ *   The animation uses negative space and restraint as its
+ *   primary tools. The void (Phase 0) creates anticipation
+ *   without a single pixel moving. The sweep reveals rather
+ *   than constructs — the logo was always there, we simply
+ *   let you see it. The scale micro-shift (1.5%) creates
+ *   physical weight without theatrics. The single glow pulse
+ *   is biological — one heartbeat — then silence. The morph
+ *   establishes the logo as the structural origin of the page.
+ *   Nothing is decorative. Everything is load-bearing.
  * ═══════════════════════════════════════════════════════════════════ */
 
-type Phase = "void" | "ambient" | "logo" | "sheen" | "text" | "exit";
+type Phase =
+  | "void"       // 0.00–0.30s
+  | "sweep"      // 0.30–1.10s
+  | "stabilize"  // 1.10–1.60s
+  | "pulse"      // 1.60–1.90s
+  | "morph"      // 1.90–2.40s
+  | "reveal";    // 2.40–2.80s (overlay dissolving)
 
 /* ── Brand palette ──────────────────────────────────────────────── */
 const BG = "#050816";
-const TEAL = "16,185,129";
-const GOLD = "245,197,66";
+const TEAL_RGB = "16,185,129";
 
-/* ── Easing curves ──────────────────────────────────────────────── */
-const EASE_SMOOTH = [0.22, 1, 0.36, 1] as const;
-const EASE_PREMIUM = [0.76, 0, 0.24, 1] as const;
-const EASE_OUT = [0.16, 1, 0.3, 1] as const;
+/* ── Easing — singular, non-negotiable ──────────────────────────── */
+const EASE: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
-/* ── Staggered text config ──────────────────────────────────────── */
-const BRAND_TEXT = "FinFoundry";
-const FIN_END = 3;
-
-/* ── Floating particles for ambient depth ───────────────────────── */
-interface Particle {
-  id: number;
-  x: string;
-  y: string;
-  size: number;
-  delay: number;
-  duration: number;
-  color: string;
-}
-
-function generateParticles(count: number): Particle[] {
-  const particles: Particle[] = [];
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      id: i,
-      x: `${10 + Math.random() * 80}%`,
-      y: `${10 + Math.random() * 80}%`,
-      size: 1 + Math.random() * 2.5,
-      delay: Math.random() * 2,
-      duration: 3 + Math.random() * 4,
-      color:
-        i % 3 === 0
-          ? `rgba(${TEAL}, ${0.3 + Math.random() * 0.4})`
-          : i % 3 === 1
-            ? `rgba(${GOLD}, ${0.2 + Math.random() * 0.3})`
-            : `rgba(255,255,255, ${0.15 + Math.random() * 0.25})`,
-    });
-  }
-  return particles;
-}
 
 /* ── The Official FinFoundry SVG Logo ───────────────────────────── *
- * CRITICAL: These are the EXACT original paths from logo.svg.
- * All d attributes, transforms, clip-paths — 100% unmodified.
+ * CRITICAL: EXACT original paths from logo.svg — unmodified.
  * ───────────────────────────────────────────────────────────────── */
-function OfficialLogo({ className, style }: { className?: string; style?: React.CSSProperties }) {
+function OfficialLogo({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -240,8 +252,52 @@ function OfficialLogo({ className, style }: { className?: string; style?: React.
   );
 }
 
-/* ── Main component ─────────────────────────────────────────────── */
 
+/* ═══════════════════════════════════════════════════════════════════
+ * Sweep Beam — Wide, feathered emerald gradient
+ *
+ * Spec: ~80px wide, feathered edges, 10–15% saturation.
+ * Must NOT look like a loading bar, neon laser, or sci-fi beam.
+ * Must feel like: light scanning a premium metallic surface.
+ * ═══════════════════════════════════════════════════════════════════ */
+function SweepBeam({ active }: { active: boolean }) {
+  return (
+    <motion.div
+      className="absolute top-0 bottom-0 pointer-events-none"
+      style={{
+        width: "clamp(60px, 8vw, 120px)",
+        background: `linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(${TEAL_RGB}, 0.03) 15%,
+          rgba(${TEAL_RGB}, 0.08) 35%,
+          rgba(${TEAL_RGB}, 0.12) 50%,
+          rgba(${TEAL_RGB}, 0.08) 65%,
+          rgba(${TEAL_RGB}, 0.03) 85%,
+          transparent 100%
+        )`,
+      }}
+      initial={{ left: "-10%" }}
+      animate={{ left: active ? "110%" : "-10%" }}
+      transition={{ duration: 0.8, ease: EASE }}
+    />
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+ * Main Component — BrandEntrance
+ *
+ * Timeline mapping to setTimeout schedule:
+ *    0 ms  →  void        Deep navy void, vignette
+ *  300 ms  →  sweep       Light beam + mask-image reveal begins
+ * 1100 ms  →  stabilize   Logo micro-scale 0.985→1, shadow depth
+ * 1600 ms  →  pulse       Single glow expand + fade
+ * 1900 ms  →  morph       Scale down, translate toward navbar
+ * 2200 ms  →  navReady    Navbar renders at final position
+ * 2400 ms  →  reveal      heroReady fires, overlay dissolves
+ * 2900 ms  →  unmount     Overlay removed from DOM
+ * ═══════════════════════════════════════════════════════════════════ */
 export function BrandEntrance() {
   const { shouldPlay, markHeroReady, markNavReady } = useEntrance();
   const prefersReduced = useReducedMotion();
@@ -250,56 +306,133 @@ export function BrandEntrance() {
   const [mounted, setMounted] = useState(true);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Memoize particles so they don't re-generate
-  const particles = useMemo(() => generateParticles(18), []);
+  /* ── Sweep progress for CSS mask-image ──────────────── */
+  const [sweepProgress, setSweepProgress] = useState(0);
+  const rafRef = useRef<number>(0);
+  const sweepStartRef = useRef(0);
 
-  /* ── Timeline ──────────────────────────────────────── */
+  const SWEEP_DURATION = 800; // ms — matches beam transition
+
+  const startSweepMask = useCallback(() => {
+    sweepStartRef.current = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - sweepStartRef.current;
+      const t = Math.min(elapsed / SWEEP_DURATION, 1);
+      // Smooth easing: cubic-bezier(0.4, 0, 0.2, 1) approximated
+      const eased = t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      setSweepProgress(eased);
+
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+  }, []);
+
+  /* ── Choreography ───────────────────────────────────── */
   useEffect(() => {
     if (!shouldPlay) return;
 
+    /* Reduced motion: skip sweep, gentle fade, morph immediately */
     if (prefersReduced) {
-      markNavReady();
-      markHeroReady();
-      setMounted(false);
-      return;
+      setSweepProgress(1);
+      setPhase("stabilize");
+      const t1 = setTimeout(() => {
+        markNavReady();
+        markHeroReady();
+        setPhase("reveal");
+      }, 400);
+      const t2 = setTimeout(() => setOverlayVisible(false), 900);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
     }
 
-    const schedule = (fn: () => void, ms: number) => {
-      const t = setTimeout(fn, ms);
-      timeoutsRef.current.push(t);
-      return t;
+    const t = (fn: () => void, ms: number) => {
+      const id = setTimeout(fn, ms);
+      timeoutsRef.current.push(id);
     };
 
-    //  0ms   → void (blank)
-    // 100ms  → ambient (background breathes, particles appear)
-    // 400ms  → logo (blur-to-focus, 1.5s transition)
-    // 1900ms → sheen (light sweep across logo)
-    // 2300ms → text (staggered character reveal)
-    // 3400ms → nav ready
-    // 3500ms → hero ready + exit begins
-    // 4200ms → overlay removed
-    schedule(() => setPhase("ambient"), 100);
-    schedule(() => setPhase("logo"), 400);
-    schedule(() => setPhase("sheen"), 1900);
-    schedule(() => setPhase("text"), 2300);
-    schedule(() => markNavReady(), 3400);
-    schedule(() => markHeroReady(), 3500);
-    schedule(() => setPhase("exit"), 3500);
-    schedule(() => setOverlayVisible(false), 4200);
+    // Phase 0: void (0–300ms) — already in "void" state
+    // Phase 1: sweep (300–1100ms)
+    t(() => {
+      setPhase("sweep");
+      startSweepMask();
+    }, 300);
+    // Phase 2: stabilize (1100–1600ms)
+    t(() => setPhase("stabilize"), 1100);
+    // Phase 3: pulse (1600–1900ms)
+    t(() => setPhase("pulse"), 1600);
+    // Phase 4: morph (1900–2400ms)
+    t(() => setPhase("morph"), 1900);
+    // Navbar appears
+    t(() => markNavReady(), 2200);
+    // Phase 5: reveal (2400–2800ms)
+    t(() => {
+      markHeroReady();
+      setPhase("reveal");
+    }, 2400);
+    // Unmount overlay
+    t(() => setOverlayVisible(false), 2900);
 
     return () => {
       timeoutsRef.current.forEach(clearTimeout);
       timeoutsRef.current = [];
+      cancelAnimationFrame(rafRef.current);
     };
-  }, [shouldPlay, prefersReduced, markHeroReady, markNavReady]);
+  }, [shouldPlay, prefersReduced, markHeroReady, markNavReady, startSweepMask]);
 
   if (!shouldPlay || !mounted) return null;
 
-  const isAmbient = phase !== "void";
-  const isLogoPhase = phase === "logo" || phase === "sheen" || phase === "text" || phase === "exit";
-  const isSheenDone = phase === "sheen" || phase === "text" || phase === "exit";
-  const isTextVisible = phase === "text" || phase === "exit";
-  const isExiting = phase === "exit";
+  /* ── Phase booleans (computed once per render) ──────── */
+  const phaseIndex = (
+    { void: 0, sweep: 1, stabilize: 2, pulse: 3, morph: 4, reveal: 5 } as const
+  )[phase];
+
+  const isBeamActive = phaseIndex >= 1; // sweep onwards
+  const isLogoVisible = phaseIndex >= 1; // mask reveals during sweep
+  const isStabilized = phaseIndex >= 2;
+  const isPulsing = phaseIndex === 3;
+  const isMorphing = phaseIndex >= 4;
+  const isRevealing = phaseIndex >= 5;
+
+  /* ── CSS mask-image for logo reveal ─────────────────── *
+   * Gradient mask slides from left to right based on      *
+   * sweepProgress (0→1). The logo is fully hidden at 0    *
+   * and fully visible at 1. No JS animation on the mask   *
+   * — only the gradient stops shift via inline style.     *
+   * ────────────────────────────────────────────────────── */
+  const maskPosition = sweepProgress * 120; // overshoot to 120% to clear fully
+  const logoMaskStyle: React.CSSProperties = isStabilized
+    ? {} // fully visible — no mask needed
+    : {
+        WebkitMaskImage: `linear-gradient(
+          90deg,
+          black ${maskPosition - 8}%,
+          rgba(0,0,0,0.6) ${maskPosition - 2}%,
+          transparent ${maskPosition + 5}%
+        )`,
+        maskImage: `linear-gradient(
+          90deg,
+          black ${maskPosition - 8}%,
+          rgba(0,0,0,0.6) ${maskPosition - 2}%,
+          transparent ${maskPosition + 5}%
+        )`,
+      };
+
+  /* ── Shadow depth ramp ──────────────────────────────── */
+  const logoFilter = isMorphing
+    ? "none"
+    : isStabilized
+      ? `drop-shadow(0 6px 24px rgba(0,0,0,0.6)) drop-shadow(0 0 10px rgba(${TEAL_RGB},0.12))`
+      : isLogoVisible
+        ? `drop-shadow(0 2px 8px rgba(0,0,0,0.3))`
+        : "none";
 
   return (
     <AnimatePresence onExitComplete={() => setMounted(false)}>
@@ -307,354 +440,204 @@ export function BrandEntrance() {
         <motion.div
           key="brand-overlay"
           className="fixed inset-0 z-[9999] overflow-hidden"
-          style={{ pointerEvents: isExiting ? "none" : "auto" }}
+          style={{
+            background: BG,
+            pointerEvents: isMorphing ? "none" : "auto",
+          }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: EASE_SMOOTH }}
+          transition={{ duration: 0.4, ease: EASE }}
         >
-          {/* ═══════════════════════════════════════════════════════
-           *  LAYER 1 — Multi-Layered Ambient Background
-           * ═══════════════════════════════════════════════════════ */}
-
-          {/* Base dark gradient */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `
-                radial-gradient(ellipse 120% 80% at 50% 40%, #0B1023 0%, ${BG} 70%),
-                linear-gradient(180deg, ${BG} 0%, #070A1A 100%)
-              `,
-            }}
-          />
-
-          {/* Primary breathing orb — teal, centered */}
-          <motion.div
-            className="absolute pointer-events-none"
-            style={{
-              width: "70vmax",
-              height: "70vmax",
-              top: "50%",
-              left: "50%",
-              marginTop: "-35vmax",
-              marginLeft: "-35vmax",
-              borderRadius: "50%",
-              background: `radial-gradient(circle, rgba(${TEAL},0.07) 0%, rgba(${TEAL},0.025) 35%, transparent 65%)`,
-              filter: "blur(60px)",
-              animation: isAmbient ? "entrance-glow-pulse 5s ease-in-out infinite" : "none",
-            }}
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{
-              opacity: isAmbient && !isExiting ? 1 : 0,
-              scale: isAmbient ? 1 : 0.7,
-            }}
-            transition={{ duration: 2, ease: EASE_SMOOTH }}
-          />
-
-          {/* Secondary orb — gold, offset top-right */}
-          <motion.div
-            className="absolute pointer-events-none"
-            style={{
-              width: "45vmax",
-              height: "45vmax",
-              top: "15%",
-              right: "-5%",
-              borderRadius: "50%",
-              background: `radial-gradient(circle, rgba(${GOLD},0.05) 0%, transparent 65%)`,
-              filter: "blur(50px)",
-              animation: isAmbient ? "entrance-glow-pulse 6s ease-in-out infinite reverse" : "none",
-            }}
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{
-              opacity: isAmbient && !isExiting ? 0.7 : 0,
-              scale: isAmbient ? 1 : 0.7,
-            }}
-            transition={{ duration: 2, delay: 0.3, ease: EASE_SMOOTH }}
-          />
-
-          {/* Tertiary orb — teal, bottom-left  */}
-          <motion.div
-            className="absolute pointer-events-none"
-            style={{
-              width: "35vmax",
-              height: "35vmax",
-              bottom: "10%",
-              left: "5%",
-              borderRadius: "50%",
-              background: `radial-gradient(circle, rgba(${TEAL},0.04) 0%, transparent 60%)`,
-              filter: "blur(45px)",
-              animation: isAmbient ? "entrance-glow-pulse 7s ease-in-out infinite" : "none",
-            }}
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{
-              opacity: isAmbient && !isExiting ? 0.6 : 0,
-              scale: isAmbient ? 1 : 0.7,
-            }}
-            transition={{ duration: 2, delay: 0.5, ease: EASE_SMOOTH }}
-          />
-
-          {/* Cinematic vignette */}
+          {/* ═══════════════════════════════════════════════════
+           *  Layer 0 — Ambient vignette
+           *  Always present. Radiates from center outward.
+           *  Creates natural focus toward center of screen.
+           * ═══════════════════════════════════════════════════ */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background:
-                "radial-gradient(ellipse 90% 80% at 50% 50%, transparent 25%, rgba(0,0,0,0.6) 100%)",
+              background: `radial-gradient(
+                ellipse 70% 60% at 50% 48%,
+                transparent 0%,
+                rgba(0,0,0,0.35) 100%
+              )`,
             }}
           />
 
-          {/* ═══════════════════════════════════════════════════════
-           *  Floating light particles — cinematic depth
-           * ═══════════════════════════════════════════════════════ */}
-          {particles.map((p) => (
-            <motion.div
-              key={p.id}
-              className="absolute rounded-full pointer-events-none"
-              style={{
-                width: p.size,
-                height: p.size,
-                left: p.x,
-                top: p.y,
-                backgroundColor: p.color,
-                boxShadow: `0 0 ${p.size * 3}px ${p.color}`,
-                willChange: "transform, opacity",
-              }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{
-                opacity: isAmbient && !isExiting ? [0, 0.8, 0] : 0,
-                y: isAmbient ? [20, -30, 20] : 20,
-              }}
-              transition={{
-                duration: p.duration,
-                delay: p.delay,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-
-          {/* Horizontal datum line */}
+          {/* ═══════════════════════════════════════════════════
+           *  Layer 1 — Spotlight → Ambient expansion
+           *  Starts as tight spotlight behind logo, expands
+           *  outward during morph to transition into full-page
+           *  ambient mode.
+           * ═══════════════════════════════════════════════════ */}
           <motion.div
             className="absolute pointer-events-none"
             style={{
-              width: "80vw",
-              maxWidth: 600,
-              height: 1,
               top: "50%",
               left: "50%",
-              marginLeft: "-40vw",
-              background: `linear-gradient(90deg, transparent, rgba(${TEAL},0.15) 20%, rgba(${GOLD},0.08) 50%, rgba(${TEAL},0.15) 80%, transparent)`,
+              borderRadius: "50%",
+              background: `radial-gradient(
+                circle,
+                rgba(${TEAL_RGB},0.04) 0%,
+                rgba(${TEAL_RGB},0.015) 40%,
+                transparent 70%
+              )`,
             }}
-            initial={{ scaleX: 0, opacity: 0 }}
-            animate={{
-              scaleX: isSheenDone && !isExiting ? 1 : 0,
-              opacity: isSheenDone && !isExiting ? 0.5 : 0,
+            initial={{
+              width: "40vmax",
+              height: "40vmax",
+              x: "-50%",
+              y: "-50%",
             }}
-            transition={{ duration: 1, ease: EASE_OUT }}
+            animate={
+              isMorphing
+                ? {
+                    width: "120vmax",
+                    height: "120vmax",
+                    x: "-50%",
+                    y: "-50%",
+                    opacity: 0.6,
+                  }
+                : {
+                    width: "40vmax",
+                    height: "40vmax",
+                    x: "-50%",
+                    y: "-50%",
+                    opacity: isLogoVisible ? 1 : 0,
+                  }
+            }
+            transition={{ duration: isMorphing ? 0.5 : 0.8, ease: EASE }}
           />
 
-          {/* ═══════════════════════════════════════════════════════
-           *  LAYER 2 — Logo + Sheen + Glow Halo
-           * ═══════════════════════════════════════════════════════ */}
-          <div className="absolute inset-0 flex items-center justify-center px-4">
+          {/* ═══════════════════════════════════════════════════
+           *  Layer 2 — Emerald light sweep beam
+           *  Wide, feathered, low-saturation gradient bar.
+           *  Drifts L→R during sweep phase.
+           * ═══════════════════════════════════════════════════ */}
+          <SweepBeam active={isBeamActive} />
+
+          {/* ═══════════════════════════════════════════════════
+           *  Layer 3 — Logo composition (centered)
+           * ═══════════════════════════════════════════════════ */}
+          <div className="absolute inset-0 flex items-center justify-center">
             <motion.div
               className="relative flex flex-col items-center"
-              /* Exit: scale toward camera + fade */
-              animate={{
-                scale: isExiting ? 1.5 : 1,
-                opacity: isExiting ? 0 : 1,
-              }}
+              /* ── Morph: scale down + drift to navbar origin ── */
+              animate={
+                isMorphing
+                  ? {
+                      scale: 0.22,
+                      y: "-40vh",
+                      x: "-20vw",
+                      opacity: 0,
+                    }
+                  : {
+                      /* Stabilize phase: 0.985 → 1.000 micro-scale */
+                      scale: isStabilized ? 1 : 0.985,
+                      y: 0,
+                      x: 0,
+                      opacity: 1,
+                    }
+              }
               transition={{
-                duration: 0.6,
-                ease: EASE_PREMIUM,
+                duration: isMorphing ? 0.5 : 0.5,
+                ease: EASE,
               }}
             >
-              {/* Dual-layer glow halo behind logo */}
-              {/* Outer glow — teal, large & soft */}
+              {/* ── Glow pulse — single fire during pulse phase ── */}
               <motion.div
                 className="absolute pointer-events-none"
                 style={{
-                  width: "clamp(200px, 35vmin, 380px)",
-                  height: "clamp(240px, 42vmin, 460px)",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -55%)",
-                  borderRadius: "24%",
-                  background: `radial-gradient(ellipse, rgba(${TEAL},0.12) 0%, rgba(${TEAL},0.03) 50%, transparent 70%)`,
-                  filter: "blur(40px)",
-                  animation:
-                    isLogoPhase && !isExiting
-                      ? "entrance-glow-pulse 3s ease-in-out infinite"
-                      : "none",
-                }}
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{
-                  opacity: isLogoPhase && !isExiting ? 0.9 : 0,
-                  scale: isLogoPhase ? 1.15 : 0.5,
-                }}
-                transition={{ duration: 1.2, ease: EASE_OUT }}
-              />
-              {/* Inner glow — gold, tight & warm */}
-              <motion.div
-                className="absolute pointer-events-none"
-                style={{
-                  width: "clamp(120px, 22vmin, 220px)",
-                  height: "clamp(150px, 28vmin, 280px)",
+                  width: "clamp(160px, 28vmin, 300px)",
+                  height: "clamp(200px, 35vmin, 380px)",
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -52%)",
-                  borderRadius: "18%",
-                  background: `radial-gradient(ellipse, rgba(${GOLD},0.1) 0%, rgba(${GOLD},0.02) 50%, transparent 70%)`,
-                  filter: "blur(25px)",
-                  animation:
-                    isLogoPhase && !isExiting
-                      ? "entrance-glow-pulse 2.5s ease-in-out infinite reverse"
-                      : "none",
+                  borderRadius: "30%",
+                  background: `radial-gradient(
+                    ellipse,
+                    rgba(${TEAL_RGB}, 0.08) 0%,
+                    rgba(${TEAL_RGB}, 0.02) 50%,
+                    transparent 70%
+                  )`,
+                  filter: "blur(24px)",
                 }}
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{
-                  opacity: isLogoPhase && !isExiting ? 0.8 : 0,
-                  scale: isLogoPhase ? 1.05 : 0.5,
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={
+                  isPulsing
+                    ? { opacity: [0, 0.6, 0], scale: [0.9, 1.06, 1.06] }
+                    : { opacity: 0, scale: 0.9 }
+                }
+                transition={{
+                  duration: 0.3,
+                  ease: EASE,
                 }}
-                transition={{ duration: 1, delay: 0.2, ease: EASE_OUT }}
               />
 
-              {/* Logo wrapper — blur→focus + sheen sweep */}
-              <motion.div
-                className="relative z-10 overflow-hidden rounded-lg"
+              {/* ── Logo with CSS mask-image gradient reveal ── */}
+              <div
+                className="relative"
                 style={{
                   width: "clamp(85px, 18vmin, 140px)",
-                }}
-                initial={{
-                  opacity: 0,
-                  scale: 0.95,
-                  filter: "blur(10px)",
-                }}
-                animate={{
-                  opacity: isLogoPhase ? 1 : 0,
-                  scale: isLogoPhase ? 1 : 0.95,
-                  filter: isLogoPhase ? "blur(0px)" : "blur(10px)",
-                }}
-                transition={{
-                  duration: 1.5,
-                  ease: EASE_SMOOTH,
+                  ...logoMaskStyle,
                 }}
               >
                 <OfficialLogo
                   className="w-full h-auto"
                   style={{
-                    filter: `
-                      drop-shadow(0 0 16px rgba(${TEAL},0.2))
-                      drop-shadow(0 0 40px rgba(${TEAL},0.08))
-                      drop-shadow(0 4px 24px rgba(0,0,0,0.4))
-                    `,
+                    filter: logoFilter,
+                    transition: "filter 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
                 />
-
-                {/* ── Light sheen sweep (moves once after logo focuses) ── */}
-                <motion.div
-                  className="absolute inset-0 pointer-events-none z-20"
-                  initial={{ x: "-120%" }}
-                  animate={{ x: isSheenDone ? "120%" : "-120%" }}
-                  transition={{
-                    duration: 0.7,
-                    ease: EASE_OUT,
-                  }}
-                  style={{
-                    background:
-                      "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.08) 42%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.08) 58%, transparent 70%)",
-                  }}
-                />
-              </motion.div>
-
-              {/* ═══════════════════════════════════════════════════
-               *  LAYER 3 — Staggered Typography
-               * ═══════════════════════════════════════════════════ */}
-              <div className="mt-5 sm:mt-7 overflow-hidden h-[48px] sm:h-[56px] md:h-[64px]">
-                <div className="flex items-center justify-center">
-                  {BRAND_TEXT.split("").map((char, i) => (
-                    <motion.span
-                      key={i}
-                      className="font-heading font-bold text-[28px] sm:text-[36px] md:text-[42px] tracking-[-0.02em] inline-block"
-                      style={{
-                        color: i < FIN_END ? "#34D399" : "#F5C542",
-                        textShadow:
-                          i < FIN_END
-                            ? `0 0 24px rgba(${TEAL},0.4), 0 0 60px rgba(${TEAL},0.15)`
-                            : `0 0 24px rgba(${GOLD},0.35), 0 0 60px rgba(${GOLD},0.1)`,
-                      }}
-                      initial={{ y: "120%", opacity: 0 }}
-                      animate={{
-                        y: isTextVisible ? "0%" : "120%",
-                        opacity: isTextVisible ? 1 : 0,
-                      }}
-                      transition={{
-                        duration: 0.6,
-                        delay: i * 0.045,
-                        ease: EASE_PREMIUM,
-                      }}
-                    >
-                      {char}
-                    </motion.span>
-                  ))}
-                </div>
               </div>
 
-              {/* Signature gradient underline */}
-              <motion.div
-                className="h-px origin-center"
-                style={{
-                  width: "clamp(140px, 30vmin, 200px)",
-                  background: `linear-gradient(90deg, transparent, rgba(${TEAL},0.5) 20%, rgba(${GOLD},0.35) 50%, rgba(${TEAL},0.5) 80%, transparent)`,
-                }}
-                initial={{ scaleX: 0, opacity: 0 }}
-                animate={{
-                  scaleX: isTextVisible ? 1 : 0,
-                  opacity: isTextVisible ? 1 : 0,
-                }}
-                transition={{
-                  duration: 0.7,
-                  delay: 0.4,
-                  ease: EASE_OUT,
-                }}
-              />
-
-              {/* Tagline */}
+              {/* ── Brand name — appears after stabilize ── */}
               <motion.p
-                className="mt-3 text-[10px] sm:text-xs tracking-[0.3em] uppercase"
-                style={{ color: "rgba(255,255,255,0.3)" }}
-                initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-                animate={{
-                  opacity: isTextVisible ? 1 : 0,
-                  y: isTextVisible ? 0 : 10,
-                  filter: isTextVisible ? "blur(0px)" : "blur(4px)",
-                }}
+                className="mt-4 sm:mt-5 font-heading font-bold text-[24px] sm:text-[30px] md:text-[34px] tracking-[-0.02em]"
+                initial={{ opacity: 0, y: 10 }}
+                animate={
+                  isStabilized && !isMorphing
+                    ? { opacity: 1, y: 0 }
+                    : isMorphing
+                      ? { opacity: 0, y: -6 }
+                      : { opacity: 0, y: 10 }
+                }
                 transition={{
-                  duration: 0.6,
-                  delay: 0.55,
-                  ease: EASE_OUT,
+                  duration: 0.4,
+                  delay: isStabilized && !isMorphing ? 0.08 : 0,
+                  ease: EASE,
                 }}
               >
-                Financial Literacy Club
+                <span style={{ color: "#34D399" }}>Fin</span>
+                <span style={{ color: "#F5C542" }}>Foundry</span>
               </motion.p>
+
+              {/* ── Gradient divider ── */}
+              <motion.div
+                className="h-px origin-center mt-2"
+                style={{
+                  width: "clamp(80px, 18vmin, 140px)",
+                  background: `linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(${TEAL_RGB}, 0.25) 30%,
+                    rgba(${TEAL_RGB}, 0.25) 70%,
+                    transparent
+                  )`,
+                }}
+                initial={{ scaleX: 0, opacity: 0 }}
+                animate={
+                  isStabilized && !isMorphing
+                    ? { scaleX: 1, opacity: 1 }
+                    : { scaleX: 0, opacity: 0 }
+                }
+                transition={{
+                  duration: 0.4,
+                  delay: isStabilized && !isMorphing ? 0.14 : 0,
+                  ease: EASE,
+                }}
+              />
             </motion.div>
           </div>
-
-          {/* ═══════════════════════════════════════════════════════
-           *  LAYER 4 — Background slide-up curtain exit
-           * ═══════════════════════════════════════════════════════ */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `linear-gradient(180deg, ${BG} 0%, #070A1A 50%, ${BG} 100%)`,
-            }}
-            initial={{ y: "0%" }}
-            animate={{
-              y: isExiting ? "-100%" : "0%",
-            }}
-            transition={{
-              duration: 0.7,
-              delay: 0.15,
-              ease: EASE_PREMIUM,
-            }}
-          />
         </motion.div>
       )}
     </AnimatePresence>

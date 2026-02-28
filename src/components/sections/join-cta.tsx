@@ -56,10 +56,10 @@ export function JoinCTA() {
           <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/contact"
-              className="btn-primary inline-flex items-center gap-2 px-8 py-3.5 text-sm rounded-xl"
+              className="group btn-primary inline-flex items-center gap-2 px-8 py-3.5 text-sm rounded-xl"
             >
               Join FinFoundry
-              <HiArrowRight className="w-4 h-4" />
+              <HiArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
             </Link>
             <Link
               href="/about"

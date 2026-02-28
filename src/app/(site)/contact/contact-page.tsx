@@ -178,7 +178,7 @@ export function ContactPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="btn-primary w-full sm:w-auto disabled:opacity-50"
+                className="btn-primary inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm rounded-xl w-full sm:w-auto disabled:opacity-50"
               >
                 {submitting ? "Sending..." : "Send Message"}
               </button>

@@ -71,7 +71,7 @@ export function Navbar() {
       <motion.header
         initial={{ opacity: 0, y: -16 }}
         animate={navReady ? { opacity: 1, y: 0 } : { opacity: 0, y: -16 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? "glass py-3"
@@ -83,7 +83,7 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
             <span data-nav-logo className="inline-flex shrink-0">
               <Image
-                src="/logo.svg"
+                src="/logo.png"
                 alt="FinFoundry"
                 width={120}
                 height={150}
@@ -358,13 +358,13 @@ export function Navbar() {
                   <>
                     <a
                       href="/login"
-                      className="flex items-center justify-center w-full px-6 py-3 text-sm font-medium rounded-xl text-foreground border border-white/[0.08] hover:bg-white/[0.04] transition-colors duration-200"
+                      className="btn-ghost flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl text-foreground"
                     >
                       Sign In
                     </a>
                     <a
                       href="/login?mode=register"
-                      className="flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl bg-gold text-background hover:bg-gold-light transition-colors duration-200"
+                      className="btn-primary flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl"
                     >
                       Join FinFoundry
                     </a>

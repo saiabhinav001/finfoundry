@@ -6,13 +6,15 @@ import { usePathname } from "next/navigation";
 /* ─────────────────────────────────────────────────────────────
  * EntranceContext — Orchestrates the brand reveal sequence.
  *
- * Timeline (homepage only, first visit per session):
- *  0.0s – Overlay visible, logo hidden
- *  0.3s – Logo fade-in + scale (1.2s)
- *  1.5s – Glow pulse (0.6s)
- *  2.1s – Logo morphs to navbar position (0.8s)
- *  2.9s – Overlay fades out, hero content begins
- *  ~3.0s – Navbar appears, page is interactive
+ * Timeline v3.0 (homepage only, first visit per session):
+ *  0.00s – Phase 0 VOID: Deep navy void, vignette, silence
+ *  0.30s – Phase 1 SWEEP: Emerald light beam L→R, CSS mask reveal
+ *  1.10s – Phase 2 STABILIZE: Logo micro-scale 0.985→1, depth
+ *  1.60s – Phase 3 PULSE: Single glow expand + fade
+ *  1.90s – Phase 4 MORPH: Scale down toward navbar origin
+ *  2.20s – navReady: Navbar renders at final position
+ *  2.40s – Phase 5 REVEAL: heroReady fires, overlay dissolves
+ *  2.90s – Overlay removed from DOM
  *
  * Respects prefers-reduced-motion: skips to instant reveal.
  * Only plays once per session (sessionStorage flag).

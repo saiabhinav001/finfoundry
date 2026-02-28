@@ -37,6 +37,10 @@ yarn-error.log*
 # temp claude files
 tmpclaude-*
 
+# internal governance docs
+SOP.md
+ARCHITECTURE-FIRESTORE.md
+
 # vercel
 .vercel
 
