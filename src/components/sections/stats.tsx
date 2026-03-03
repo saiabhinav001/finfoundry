@@ -3,8 +3,20 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { stats as staticStats } from "@/data/site-data";
-import { fadeUp, stagger, viewport } from "@/lib/motion";
+import { perspectiveRise, staggerPerspective, viewportCard } from "@/lib/motion";
 
+/* ═══════════════════════════════════════════════════════════════════
+ * Stats v3.0 — Perspective Rise Cards
+ *
+ * Each stat card enters with a micro rotateX tilt that settles
+ * to flat. Creates dimensional "dealing" effect.
+ * Parent has CSS perspective for 3D visibility.
+ *
+ * Unique from other sections: No depthLift heading, no fadeUp.
+ * Cards tip forward then settle — distinct from programs/events.
+ *
+ * SOP compliance: §4, §7, §8, §9
+ * ═══════════════════════════════════════════════════════════════════ */
 export function StatsSection() {
   const [stats, setStats] = useState(staticStats);
 
@@ -34,17 +46,19 @@ export function StatsSection() {
       />
       <div className="relative z-10 container-max">
         <motion.div
-          variants={stagger}
+          variants={staggerPerspective}
           initial="hidden"
           whileInView="visible"
-          viewport={viewport}
+          viewport={viewportCard}
           className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8"
+          style={{ perspective: "800px" }}
         >
           {stats.map((stat) => (
             <motion.div
               key={stat.label}
-              variants={fadeUp}
+              variants={perspectiveRise}
               className="glass-stat rounded-2xl p-6 sm:p-8 text-center group cursor-default"
+              style={{ transformStyle: "preserve-3d" }}
             >
               <div className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-gradient-gold tracking-[-0.03em]">
                 {stat.value}

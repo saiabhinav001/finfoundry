@@ -30,7 +30,7 @@ export function EventsPreview() {
   const previewEvents = events.slice(0, 3);
 
   return (
-    <SectionWrapper>
+    <SectionWrapper showGlow glowColor="gold">
       <SectionHeading
         badge="Events"
         title="What's Happening"

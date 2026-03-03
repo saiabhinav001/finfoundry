@@ -39,7 +39,7 @@ export function ProgramsPreview() {
   }, []);
 
   return (
-    <SectionWrapper className="bg-surface">
+    <SectionWrapper className="bg-surface" showGlow>
       <SectionHeading
         badge="Programs"
         title="Structured Learning Paths"
