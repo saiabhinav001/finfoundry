@@ -25,7 +25,12 @@ export function StatsSection() {
     fetch("/api/about")
       .then((r) => r.json())
       .then((data) => {
-        if (data.stats && Array.isArray(data.stats) && data.stats.length > 0)
+        if (
+          data.stats &&
+          Array.isArray(data.stats) &&
+          data.stats.length > 0 &&
+          data.stats.every((s: { value?: string }) => typeof s.value === "string")
+        )
           setStats(data.stats);
       })
       .catch(() => {});

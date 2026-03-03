@@ -64,13 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const [googleLoading, setGoogleLoading] = useState(() => {
-    // Restore spinner while the OAuth redirect is in flight
-    if (typeof window !== "undefined") {
-      return sessionStorage.getItem(GOOGLE_REDIRECT_PENDING) === "1";
-    }
-    return false;
-  });
+  // Start false on both server & client to avoid hydration mismatch.
+  // Actual sessionStorage check is deferred to useEffect below.
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
   // Guard to prevent duplicate createSession calls during signUpWithEmail
   const skipNextAuthChange = useRef(false);
@@ -104,6 +100,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Session creation failed:", errMsg);
       setSessionError(errMsg);
     }
+  }, []);
+
+  // Restore the google-loading spinner from sessionStorage (deferred
+  // to useEffect to keep server & client initial state identical).
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(GOOGLE_REDIRECT_PENDING) === "1") {
+        setGoogleLoading(true);
+      }
+    } catch {}
   }, []);
 
   useEffect(() => {

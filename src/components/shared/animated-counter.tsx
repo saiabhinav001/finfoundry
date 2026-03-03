@@ -56,7 +56,7 @@ function easeOutExpo(t: number): number {
   return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
 }
 
-export function AnimatedCounter({ value, duration = 2000 }: AnimatedCounterProps) {
+export function AnimatedCounter({ value = "0", duration = 2000 }: AnimatedCounterProps) {
   const prefersReduced = useReducedMotion();
   const ref = useRef<HTMLSpanElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);

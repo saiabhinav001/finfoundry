@@ -61,7 +61,7 @@ export function EntranceProvider({ children }: { children: ReactNode }) {
     if (isHome && !prefersReduced && !alreadyPlayed) {
       setShouldPlay(true);
       setIsPlaying(true);
-      sessionStorage.setItem(SESSION_KEY, "1");
+      try { sessionStorage.setItem(SESSION_KEY, "1"); } catch {}
     } else {
       // Skip entrance — everything ready immediately
       setHeroReady(true);

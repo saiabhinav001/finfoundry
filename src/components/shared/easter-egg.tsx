@@ -4,17 +4,17 @@ import { useEffect, useRef, useCallback } from "react";
 import confetti from "canvas-confetti";
 
 /* ═══════════════════════════════════════════════════════════════════
- * EasterEgg v1.1 — Konami Code hidden interaction
+ * EasterEgg v2.0 — Konami Code hidden interaction
  *
  * Listens for the classic Konami Code sequence:
  *   ↑ ↑ ↓ ↓ ← → ← → B A
  *
  * On successful input, fires a gold + emerald confetti burst
- * using canvas-confetti (lightweight, tree-shaken).
+ * using canvas-confetti (lightweight, tree-shaken), plus shows
+ * a brief on-screen toast so the user knows it worked.
  *
- * v1.1 fix: Uses a ref to track keystrokes instead of React state.
- * State updaters are pure functions — calling confetti() inside
- * one is a side effect that React 19 strict mode can suppress.
+ * v2.0: Uses refs for keystroke tracking + shows visual toast.
+ * Prevents default arrow-key scrolling mid-sequence.
  * ═══════════════════════════════════════════════════════════════════ */
 
 const KONAMI_SEQUENCE = [
@@ -31,6 +31,40 @@ const KONAMI_SEQUENCE = [
 ];
 
 const KONAMI_STR = KONAMI_SEQUENCE.join(",");
+
+/** Set of keys that are part of the Konami code to prevent default scroll */
+const KONAMI_KEYS = new Set(KONAMI_SEQUENCE);
+
+function showToast() {
+  const el = document.createElement("div");
+  el.textContent = "🎉 Konami Code Activated!";
+  Object.assign(el.style, {
+    position: "fixed",
+    bottom: "24px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: "linear-gradient(135deg, #10B981, #059669)",
+    color: "#fff",
+    padding: "12px 24px",
+    borderRadius: "12px",
+    fontWeight: "600",
+    fontSize: "14px",
+    zIndex: "100000",
+    boxShadow: "0 8px 32px rgba(16,185,129,0.4)",
+    transition: "opacity 0.5s, transform 0.5s",
+    opacity: "0",
+  });
+  document.body.appendChild(el);
+  requestAnimationFrame(() => {
+    el.style.opacity = "1";
+    el.style.transform = "translateX(-50%) translateY(-8px)";
+  });
+  setTimeout(() => {
+    el.style.opacity = "0";
+    el.style.transform = "translateX(-50%) translateY(8px)";
+    setTimeout(() => el.remove(), 500);
+  }, 2500);
+}
 
 function fireConfetti() {
   const defaults = {
@@ -71,6 +105,8 @@ function fireConfetti() {
       origin: { x: 0.5, y: 0.6 },
     });
   }, 300);
+
+  showToast();
 }
 
 export function EasterEgg() {
@@ -78,6 +114,12 @@ export function EasterEgg() {
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+
+    // Prevent arrow key scrolling when user is mid-sequence
+    if (keysRef.current.length > 0 && KONAMI_KEYS.has(e.key)) {
+      e.preventDefault();
+    }
+
     const next = [...keysRef.current, key].slice(-10);
     keysRef.current = next;
 

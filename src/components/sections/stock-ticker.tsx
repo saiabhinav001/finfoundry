@@ -142,11 +142,11 @@ export function StockTicker() {
           </span>
           <span
             className={`text-[10px] sm:text-[11px] font-bold tabular-nums ${
-              item.change >= 0 ? "text-emerald-400" : "text-red-400"
+              (item.change ?? 0) >= 0 ? "text-emerald-400" : "text-red-400"
             }`}
           >
-            {item.change >= 0 ? "+" : ""}
-            {item.change.toFixed(2)}%
+            {(item.change ?? 0) >= 0 ? "+" : ""}
+            {(item.change ?? 0).toFixed(2)}%
           </span>
           {/* Separator */}
           <span className="text-white/[0.08] text-[10px] ml-1">│</span>
