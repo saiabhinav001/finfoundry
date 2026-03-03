@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { verifySession } from "@/lib/firebase/auth-helpers";
 import { logAction } from "@/lib/audit-log";
+import { invalidateCache } from "@/lib/cache";
 
 /**
  * POST — Transfer Super Admin role to another user.
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
       role: "admin",
     });
     await batch.commit();
+    invalidateCache("users");
 
     await logAction(
       session.uid,

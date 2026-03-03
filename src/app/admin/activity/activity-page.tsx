@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Toast, type ToastData } from "@/components/admin/toast";
-import { Activity, Search, Filter, Calendar, Download } from "lucide-react";
+import { Activity, Search, Filter, Calendar, Download, RefreshCw } from "lucide-react";
 
 interface AuditEntry {
   id: string;
@@ -24,13 +24,23 @@ export function ActivityPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const showToast = (message: string, type: "success" | "error") => setToast({ message, type });
 
+  const fetchEntries = async (refresh = false) => {
+    try {
+      const url = refresh ? "/api/audit?refresh=true" : "/api/audit";
+      const res = await fetch(url);
+      const data = await res.json();
+      if (Array.isArray(data)) setEntries(data);
+    } catch {
+      showToast("Could not load activity log.", "error");
+    }
+  };
+
   useEffect(() => {
-    fetch("/api/audit")
-      .then((res) => res.json())
-      .then((data) => { if (Array.isArray(data)) setEntries(data); })
-      .catch(() => showToast("Could not load activity log.", "error"))
+    fetchEntries()
       .finally(() => setLoading(false));
   }, []);
 
@@ -98,6 +108,18 @@ export function ActivityPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-muted-foreground/40">{entries.length} total entries</span>
+          <button
+            onClick={async () => {
+              setRefreshing(true);
+              await fetchEntries(true);
+              setRefreshing(false);
+              showToast("Activity log refreshed.", "success");
+            }}
+            disabled={refreshing}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Refresh
+          </button>
           {filtered.length > 0 && (
             <button onClick={exportCSV} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
               <Download className="w-3.5 h-3.5" /> Export CSV

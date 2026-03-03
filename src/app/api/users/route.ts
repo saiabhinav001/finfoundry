@@ -2,21 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { verifySession, requireRole } from "@/lib/firebase/auth-helpers";
 import { logAction } from "@/lib/audit-log";
+import { createCachedFetcher, invalidateCache } from "@/lib/cache";
 
-/** GET — List all users (admin+) */
+const getUsers = createCachedFetcher("users", async () => {
+  const snap = await adminDb
+    .collection("users")
+    .orderBy("createdAt", "desc")
+    .get();
+  return snap.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
+}, ["users"]);
+
+/** GET — List all users (admin+, cached) */
 export async function GET(request: NextRequest) {
   try {
     const { role } = await verifySession(request);
     requireRole(role, "admin");
 
-    const snap = await adminDb
-      .collection("users")
-      .orderBy("createdAt", "desc")
-      .get();
-    const users = snap.docs.map((doc) => ({
-      uid: doc.id,
-      ...doc.data(),
-    }));
+    const users = await getUsers();
 
     return NextResponse.json(users);
   } catch (error: unknown) {
@@ -98,6 +100,7 @@ export async function DELETE(request: NextRequest) {
 
     // 3. Delete from Firestore
     await adminDb.collection("users").doc(uid).delete();
+    invalidateCache("users");
 
     await logAction(
       session.uid,

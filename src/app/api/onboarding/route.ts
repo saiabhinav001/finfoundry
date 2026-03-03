@@ -1,24 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { verifySession, requireRole } from "@/lib/firebase/auth-helpers";
+import { unstable_cache } from "next/cache";
+import { invalidateCache } from "@/lib/cache";
 
 /**
- * GET /api/onboarding — Read current user's onboarding state.
- * Returns { tourComplete, checklistDismissed, checklistProgress }.
+ * Cached per-user onboarding fetcher.
+ * The uid argument becomes part of the cache key so each user
+ * gets their own cached entry. All entries share the "onboarding"
+ * tag so one invalidateCache("onboarding") busts all of them
+ * (fine — only 3-5 admin users).
+ */
+const getOnboardingState = unstable_cache(
+  async (uid: string) => {
+    const doc = await adminDb.collection("users").doc(uid).get();
+    const data = doc.data() || {};
+    return {
+      tourComplete: data.tourComplete ?? false,
+      checklistDismissed: data.checklistDismissed ?? false,
+      checklistProgress: data.checklistProgress ?? {},
+    };
+  },
+  ["onboarding"],
+  { tags: ["onboarding"], revalidate: 86400 }
+);
+
+/**
+ * GET /api/onboarding — Read current user's onboarding state (cached).
  */
 export async function GET(request: NextRequest) {
   try {
     const { uid, role } = await verifySession(request);
     requireRole(role, "editor");
 
-    const doc = await adminDb.collection("users").doc(uid).get();
-    const data = doc.data() || {};
+    const state = await getOnboardingState(uid);
 
-    return NextResponse.json({
-      tourComplete: data.tourComplete ?? false,
-      checklistDismissed: data.checklistDismissed ?? false,
-      checklistProgress: data.checklistProgress ?? {},
-    });
+    return NextResponse.json(state);
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Server error";
     const status = msg.includes("Insufficient")
@@ -57,6 +74,7 @@ export async function PATCH(request: NextRequest) {
 
     if (Object.keys(update).length > 0) {
       await adminDb.collection("users").doc(uid).update(update);
+      invalidateCache("onboarding");
     }
 
     return NextResponse.json({ success: true });

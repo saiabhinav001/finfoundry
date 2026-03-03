@@ -3,6 +3,7 @@ import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { verifySessionFull } from "@/lib/firebase/auth-helpers";
 import type { UserRole } from "@/types/firebase";
 import { logAction } from "@/lib/audit-log";
+import { invalidateCache } from "@/lib/cache";
 
 const VALID_ROLES: UserRole[] = ["member", "editor", "admin", "super_admin"];
 
@@ -179,6 +180,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     await adminDb.collection("users").doc(uid).update({ active });
+    invalidateCache("users");
 
     // Sync active status to custom claims
     try {

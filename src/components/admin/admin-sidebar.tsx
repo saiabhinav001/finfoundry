@@ -48,17 +48,17 @@ export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
   const { startTour, tourComplete } = useOnboarding();
   const isAdmin = role ? canManageUsers(role) : false;
 
-  // Fetch unread message count
+  // Fetch unread message count — lightweight aggregation endpoint (1 Firestore read, cached)
   useEffect(() => {
     const fetchUnread = async () => {
       try {
-        const res = await fetch("/api/contact");
+        const res = await fetch("/api/contact/unread-count");
         const data = await res.json();
-        if (Array.isArray(data)) setUnreadCount(data.filter((m: { read: boolean }) => !m.read).length);
+        if (typeof data.count === "number") setUnreadCount(data.count);
       } catch { /* silent */ }
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 60000); // refresh every 60s
+    const interval = setInterval(fetchUnread, 300000); // refresh every 5 min
     return () => clearInterval(interval);
   }, []);
 

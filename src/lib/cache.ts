@@ -1,24 +1,26 @@
 /**
- * Persistent data cache for API route responses (v2.0).
+ * Persistent data cache for API route responses (v3.0).
  *
  * Uses Next.js `unstable_cache` backed by Vercel's Data Cache, which
  * persists across serverless cold starts (unlike the old in-memory Map).
  *
- * Each collection has a dedicated cache tag for on-demand invalidation:
+ * Architecture:
+ *   - 24-hour TTL safety net (data almost never hits this; mutations
+ *     trigger on-demand invalidation well before expiry)
  *   - `revalidateTag("events")` instantly purges the events cache
- *   - TTL fallback: data auto-refreshes every 10 minutes even without
- *     an explicit invalidation call
+ *   - ALL routes cached: public collections + admin-only (contact,
+ *     audit, users, onboarding)
+ *   - Sidebar uses lightweight count() aggregation endpoint
+ *   - Audit cache is never auto-invalidated; admin triggers refresh
  *
- * Expected Firestore reads:  ~0 per request (served from Data Cache)
- *   Reads only happen on first request after a revalidation.
- *   With 6 collections refreshing every 10 min = 864 reads/day MAX.
- *   With on-demand-only revalidation = ~20 reads/day.
+ * Expected Firestore reads (college club, ~30 mutations/month):
+ *   ~1,500–3,000 reads/month — well within Spark 50K limit.
  */
 
 import { unstable_cache } from "next/cache";
 import { revalidateTag } from "next/cache";
 
-const DEFAULT_REVALIDATE_SECONDS = 600; // 10 minutes
+const DEFAULT_REVALIDATE_SECONDS = 86400; // 24 hours
 
 /**
  * Create a cached data fetcher backed by Vercel's persistent Data Cache.

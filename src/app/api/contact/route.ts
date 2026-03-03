@@ -4,6 +4,19 @@ import { verifySession, requireRole } from "@/lib/firebase/auth-helpers";
 import { FieldValue } from "firebase-admin/firestore";
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 import { sanitize, isValidEmail, isNonEmpty } from "@/lib/sanitize";
+import { createCachedFetcher, invalidateCache } from "@/lib/cache";
+
+const getContacts = createCachedFetcher("contacts", async () => {
+  const snap = await adminDb
+    .collection("contacts")
+    .orderBy("createdAt", "desc")
+    .get();
+  return snap.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+    createdAt: doc.data().createdAt?.toDate?.()?.toISOString?.() || null,
+  }));
+}, ["contact"]);
 
 /** POST — Public: Submit a contact message */
 export async function POST(request: NextRequest) {
@@ -52,6 +65,8 @@ export async function POST(request: NextRequest) {
       createdAt: FieldValue.serverTimestamp(),
     });
 
+    invalidateCache("contact", "contact_count");
+
     return NextResponse.json({ message: "Message sent successfully!" });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Server error";
@@ -59,22 +74,13 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/** GET — Admin+: List all contact submissions */
+/** GET — Admin+: List all contact submissions (cached) */
 export async function GET(request: NextRequest) {
   try {
     const { role } = await verifySession(request);
     requireRole(role, "admin");
 
-    const snap = await adminDb
-      .collection("contacts")
-      .orderBy("createdAt", "desc")
-      .get();
-
-    const contacts = snap.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.()?.toISOString?.() || null,
-    }));
+    const contacts = await getContacts();
 
     return NextResponse.json(contacts);
   } catch (error: unknown) {
@@ -104,6 +110,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     await adminDb.collection("contacts").doc(id).update({ read });
+    invalidateCache("contact", "contact_count");
 
     return NextResponse.json({ message: "Updated!" });
   } catch (error: unknown) {
@@ -133,6 +140,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await adminDb.collection("contacts").doc(id).delete();
+    invalidateCache("contact", "contact_count");
 
     return NextResponse.json({ message: "Message deleted!" });
   } catch (error: unknown) {
