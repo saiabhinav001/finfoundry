@@ -49,10 +49,10 @@ export async function PATCH(request: NextRequest) {
       update.checklistDismissed = body.checklistDismissed;
     }
     if (body.checklistProgress && typeof body.checklistProgress === "object") {
-      // Merge with existing progress, don't overwrite
-      const doc = await adminDb.collection("users").doc(uid).get();
-      const existing = doc.data()?.checklistProgress ?? {};
-      update.checklistProgress = { ...existing, ...body.checklistProgress };
+      // Use dot-notation merge to avoid an extra Firestore read
+      for (const [taskId, done] of Object.entries(body.checklistProgress)) {
+        update[`checklistProgress.${taskId}`] = done;
+      }
     }
 
     if (Object.keys(update).length > 0) {

@@ -92,6 +92,9 @@ export async function POST(request: NextRequest) {
       if (Object.keys(updates).length > 0) {
         await userRef.update(updates);
       }
+
+      // Track last login timestamp (1 write, no extra reads)
+      await userRef.update({ lastLogin: new Date().toISOString() });
     }
 
     // Embed role in Firebase Auth custom claims so future verifySession()

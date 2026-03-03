@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { verifySession, requireRole } from "@/lib/firebase/auth-helpers";
 import { logAction } from "@/lib/audit-log";
-import { invalidate } from "@/lib/cache";
+import { invalidateCache } from "@/lib/cache";
 
 const ALLOWED_COLLECTIONS = ["team", "programs", "resources"];
 
@@ -42,7 +42,8 @@ export async function PATCH(request: NextRequest) {
       "update",
       `reordered ${collection} (${orderedIds.length} items)`
     );
-    invalidate(collection);
+    // Invalidate both public and admin cache for the collection
+    invalidateCache(collection, `${collection}_all`);
 
     return NextResponse.json({ message: "Order updated!" });
   } catch (error: unknown) {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { TeamPage } from "./team-page";
+import { breadcrumbJsonLd } from "@/lib/json-ld";
 
 export const metadata: Metadata = {
   title: "Team",
@@ -7,6 +8,13 @@ export const metadata: Metadata = {
     "Meet the CBIT FinFoundry team for the 2025-2026 term. Student leaders driving financial literacy.",
 };
 
+const jsonLd = breadcrumbJsonLd([{ name: "Team", path: "/team" }]);
+
 export default function Page() {
-  return <TeamPage />;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <TeamPage />
+    </>
+  );
 }

@@ -1,79 +1,56 @@
 /**
- * In-memory TTL cache for API route responses.
- * Prevents redundant Firestore reads for public data.
+ * Persistent data cache for API route responses (v2.0).
  *
- * Default TTL: 5 minutes — meaning all visitors in 5m = 1 read, not N.
- * Stale-while-revalidate: returns stale data immediately while
- * background-refreshing, so users never wait for Firestore.
+ * Uses Next.js `unstable_cache` backed by Vercel's Data Cache, which
+ * persists across serverless cold starts (unlike the old in-memory Map).
+ *
+ * Each collection has a dedicated cache tag for on-demand invalidation:
+ *   - `revalidateTag("events")` instantly purges the events cache
+ *   - TTL fallback: data auto-refreshes every 10 minutes even without
+ *     an explicit invalidation call
+ *
+ * Expected Firestore reads:  ~0 per request (served from Data Cache)
+ *   Reads only happen on first request after a revalidation.
+ *   With 6 collections refreshing every 10 min = 864 reads/day MAX.
+ *   With on-demand-only revalidation = ~20 reads/day.
  */
 
-interface CacheEntry<T> {
-  data: T;
-  expiresAt: number;
-}
+import { unstable_cache } from "next/cache";
+import { revalidateTag } from "next/cache";
 
-const store = new Map<string, CacheEntry<unknown>>();
-const inflight = new Map<string, Promise<unknown>>();
-
-const DEFAULT_TTL_MS = 10 * 60 * 1000; // 10 minutes — warm instances share cache across requests
+const DEFAULT_REVALIDATE_SECONDS = 600; // 10 minutes
 
 /**
- * Get cached value, or fetch fresh if expired/missing.
- * Uses stale-while-revalidate: if data is stale, returns it
- * immediately and triggers a background refresh.
+ * Create a cached data fetcher backed by Vercel's persistent Data Cache.
+ *
+ * The returned function can be called repeatedly — it will serve cached
+ * data until the TTL expires OR `invalidateCache(tag)` is called.
+ *
+ * IMPORTANT: The fetcher must return serializable data (plain objects,
+ * arrays, primitives). Firestore snapshots must be mapped to POJOs
+ * inside the fetcher.
+ *
+ * @param key         Unique cache key (e.g. "events", "about")
+ * @param fetcher     Async function returning serializable data
+ * @param tags        Cache tags for on-demand invalidation
+ * @param revalidate  TTL in seconds (default: 600)
  */
-export async function cached<T>(
+export function createCachedFetcher<T>(
   key: string,
   fetcher: () => Promise<T>,
-  ttlMs = DEFAULT_TTL_MS
-): Promise<T> {
-  const now = Date.now();
-  const entry = store.get(key) as CacheEntry<T> | undefined;
-
-  // Fresh hit — return immediately
-  if (entry && entry.expiresAt > now) {
-    return entry.data;
-  }
-
-  // Stale hit — return stale data, revalidate in background
-  if (entry) {
-    if (!inflight.has(key)) {
-      const refresh = fetcher().then((data) => {
-        store.set(key, { data, expiresAt: Date.now() + ttlMs });
-        inflight.delete(key);
-        return data;
-      }).catch(() => { inflight.delete(key); });
-      inflight.set(key, refresh);
-    }
-    return entry.data;
-  }
-
-  // Cold miss — must wait for fetch (deduplicate concurrent requests)
-  if (inflight.has(key)) {
-    return inflight.get(key) as Promise<T>;
-  }
-
-  const promise = fetcher().then((data) => {
-    store.set(key, { data, expiresAt: Date.now() + ttlMs });
-    inflight.delete(key);
-    return data;
-  }).catch((err) => {
-    inflight.delete(key);
-    throw err;
-  });
-
-  inflight.set(key, promise);
-  return promise;
+  tags: string[],
+  revalidate = DEFAULT_REVALIDATE_SECONDS
+): () => Promise<T> {
+  return unstable_cache(fetcher, [key], { tags, revalidate });
 }
 
-/** Invalidate a specific cache key (call after mutations). */
-export function invalidate(key: string): void {
-  store.delete(key);
-  inflight.delete(key);
-}
-
-/** Invalidate all cache entries. */
-export function invalidateAll(): void {
-  store.clear();
-  inflight.clear();
+/**
+ * Invalidate one or more cache tags.
+ * Call this after mutations (POST / PUT / DELETE) so the next
+ * GET request fetches fresh data from Firestore.
+ */
+export function invalidateCache(...tags: string[]): void {
+  for (const tag of tags) {
+    revalidateTag(tag, { expire: 0 });
+  }
 }

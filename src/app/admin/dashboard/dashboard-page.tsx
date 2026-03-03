@@ -12,6 +12,9 @@ import {
   TrendingUp,
   ExternalLink,
   ArrowRight,
+  Plus,
+  Settings,
+  Eye,
 } from "lucide-react";
 import Link from "next/link";
 import { GettingStarted } from "@/components/admin/getting-started";
@@ -167,21 +170,38 @@ export function DashboardPage() {
         <h2 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-teal-light/60" /> Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: "View Website", href: "/", external: true },
-            { label: "Manage Team", href: "/admin/team" },
-            { label: "Manage Events", href: "/admin/events" },
-            { label: "Site Settings", href: "/admin/settings" },
-          ].map((link) => (
-            link.external ? (
-              <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] text-sm text-muted-foreground hover:text-foreground transition-all duration-200">
-                <ExternalLink className="w-3.5 h-3.5" /> {link.label}
+            { label: "Create Event", href: "/admin/events", icon: Plus, accent: true },
+            { label: "View Messages", href: "/admin/messages", icon: MessageSquare, badge: stats?.unreadMessages },
+            { label: "Manage Team", href: "/admin/team", icon: Users },
+            { label: "Site Settings", href: "/admin/settings", icon: Settings },
+            { label: "View Activity", href: "/admin/activity", icon: Activity },
+            { label: "Add Program", href: "/admin/programs", icon: Plus },
+            { label: "Add Resources", href: "/admin/resources", icon: Plus },
+            { label: "View Website", href: "/", icon: Eye, external: true },
+          ].map((link) => {
+            const Icon = link.icon;
+            const cls = link.accent
+              ? "bg-teal/[0.08] border-teal/20 hover:bg-teal/[0.12] text-teal-light"
+              : "bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] text-muted-foreground hover:text-foreground";
+            const inner = (
+              <>
+                <Icon className="w-3.5 h-3.5" />
+                {link.label}
+                {link.badge ? (
+                  <span className="ml-auto px-1.5 py-0.5 rounded-full bg-teal/20 text-teal-light text-[10px] font-bold">{link.badge}</span>
+                ) : null}
+              </>
+            );
+            return link.external ? (
+              <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 p-3 rounded-xl border text-sm transition-all duration-200 ${cls}`}>
+                {inner}
               </a>
             ) : (
-              <Link key={link.label} href={link.href} className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] text-sm text-muted-foreground hover:text-foreground transition-all duration-200">
-                <ArrowRight className="w-3.5 h-3.5" /> {link.label}
+              <Link key={link.label} href={link.href} className={`flex items-center gap-2 p-3 rounded-xl border text-sm transition-all duration-200 ${cls}`}>
+                {inner}
               </Link>
-            )
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

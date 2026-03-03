@@ -4,18 +4,20 @@ import { verifySession, requireRole } from "@/lib/firebase/auth-helpers";
 import { FieldValue } from "firebase-admin/firestore";
 import { logAction } from "@/lib/audit-log";
 import { sanitize } from "@/lib/sanitize";
-import { cached, invalidate } from "@/lib/cache";
+import { createCachedFetcher, invalidateCache } from "@/lib/cache";
 
-/** GET — List all programs (public, cached 60s) */
+const getPrograms = createCachedFetcher("programs", async () => {
+  const snap = await adminDb
+    .collection("programs")
+    .orderBy("order", "asc")
+    .get();
+  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}, ["programs"]);
+
+/** GET — List all programs (public, persistent cache) */
 export async function GET() {
   try {
-    const programs = await cached("programs", async () => {
-      const snap = await adminDb
-        .collection("programs")
-        .orderBy("order", "asc")
-        .get();
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    });
+    const programs = await getPrograms();
     return NextResponse.json(programs, {
       headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" },
     });
@@ -42,9 +44,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Auto-assign order based on existing count
-    const snap = await adminDb.collection("programs").get();
-    const order = snap.size;
+    // Use count aggregation instead of fetching all docs (1 read vs N reads)
+    const countSnap = await adminDb.collection("programs").count().get();
+    const order = countSnap.data().count;
 
     const docRef = await adminDb.collection("programs").add({
       title,
@@ -56,7 +58,7 @@ export async function POST(request: NextRequest) {
     });
 
     await logAction(session.uid, session.name, "create", `created program "${title}"`);
-    invalidate("programs");
+    invalidateCache("programs");
 
     return NextResponse.json({ id: docRef.id, message: "Program created!" });
   } catch (error: unknown) {
@@ -88,7 +90,7 @@ export async function PUT(request: NextRequest) {
       .update({ ...data, updatedAt: FieldValue.serverTimestamp() });
 
     await logAction(session.uid, session.name, "update", `updated program "${data.title || id}"`);
-    invalidate("programs");
+    invalidateCache("programs");
 
     return NextResponse.json({ message: "Program updated!" });
   } catch (error: unknown) {
@@ -112,7 +114,7 @@ export async function DELETE(request: NextRequest) {
     const title = doc.data()?.title || id;
     await adminDb.collection("programs").doc(id).delete();
     await logAction(session.uid, session.name, "delete", `deleted program "${title}"`);
-    invalidate("programs");
+    invalidateCache("programs");
 
     return NextResponse.json({ message: "Program deleted!" });
   } catch (error: unknown) {

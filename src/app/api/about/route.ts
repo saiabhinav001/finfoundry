@@ -3,18 +3,20 @@ import { adminDb } from "@/lib/firebase/admin";
 import { verifySession, requireRole } from "@/lib/firebase/auth-helpers";
 import { FieldValue } from "firebase-admin/firestore";
 import { logAction } from "@/lib/audit-log";
-import { cached, invalidate } from "@/lib/cache";
+import { createCachedFetcher, invalidateCache } from "@/lib/cache";
 
 const ABOUT_DOC = "content";
 
-/** GET — Public: returns about page content (cached 60s) */
+const getAbout = createCachedFetcher("about", async () => {
+  const doc = await adminDb.collection("about").doc(ABOUT_DOC).get();
+  if (!doc.exists) return {};
+  return { id: doc.id, ...doc.data() };
+}, ["about"]);
+
+/** GET — Public: returns about page content (persistent cache) */
 export async function GET() {
   try {
-    const data = await cached("about", async () => {
-      const doc = await adminDb.collection("about").doc(ABOUT_DOC).get();
-      if (!doc.exists) return {};
-      return { id: doc.id, ...doc.data() };
-    });
+    const data = await getAbout();
     return NextResponse.json(data, {
       headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" },
     });
@@ -41,7 +43,7 @@ export async function PUT(request: NextRequest) {
       );
 
     await logAction(session.uid, session.name, "update", "updated about page content");
-    invalidate("about");
+    invalidateCache("about");
 
     return NextResponse.json({ message: "About page updated!" });
   } catch (error: unknown) {

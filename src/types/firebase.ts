@@ -12,6 +12,7 @@ export interface UserProfile {
   active: boolean;
   photoURL?: string;
   createdAt: unknown; // Firestore Timestamp
+  lastLogin?: string; // ISO string from session route
 }
 
 export interface EventDoc {

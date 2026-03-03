@@ -28,6 +28,12 @@ const statusColors: Record<string, string> = {
   completed: "text-muted-foreground bg-white/[0.03] border-white/[0.06]",
 };
 
+const statusLabels: Record<string, string> = {
+  upcoming: "upcoming",
+  ongoing: "🔴 Happening Now",
+  completed: "completed",
+};
+
 type FilterType = "all" | "upcoming" | "ongoing" | "completed";
 
 export function EventsPage() {
@@ -104,11 +110,11 @@ export function EventsPage() {
                     <span className="text-xs font-medium">{event.date}</span>
                   </div>
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 text-[11px] font-medium rounded-full border capitalize ${
+                    className={`inline-flex items-center px-2.5 py-0.5 text-[11px] font-medium rounded-full border ${
                       statusColors[event.status]
-                    }`}
+                    } ${event.status === "ongoing" ? "animate-pulse" : ""}`}
                   >
-                    {event.status}
+                    {statusLabels[event.status] || event.status}
                   </span>
                 </div>
 
@@ -143,7 +149,12 @@ export function EventsPage() {
                   </div>
                 )}
 
-                {event.registrationLink && event.status !== "completed" && (
+                {event.status === "completed" ? (
+                  <div className="mt-4 px-4 py-2 rounded-lg text-xs font-medium text-muted-foreground/60 bg-white/[0.02] border border-white/[0.04] inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
+                    Event Completed
+                  </div>
+                ) : event.registrationLink ? (
                   <a
                     href={event.registrationLink}
                     target="_blank"
@@ -153,7 +164,12 @@ export function EventsPage() {
                     <ExternalLink className="w-3 h-3" />
                     Register Now
                   </a>
-                )}
+                ) : event.status === "upcoming" || event.status === "ongoing" ? (
+                  <div className="mt-4 px-4 py-2 rounded-lg text-xs font-medium text-gold/60 bg-gold/[0.04] border border-gold/[0.08] inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gold/40" />
+                    Registration Link Coming Soon
+                  </div>
+                ) : null}
               </motion.div>
             );
           })}

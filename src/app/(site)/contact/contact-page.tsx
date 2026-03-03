@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { siteConfig } from "@/data/site-data";
 import { FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { HiOutlineMail, HiOutlineLocationMarker } from "react-icons/hi";
 import { fadeUp, stagger, viewport } from "@/lib/motion";
 import { PageHero } from "@/components/shared/page-hero";
+import { CheckCircle2, Send } from "lucide-react";
 
 export function ContactPage() {
   const [form, setForm] = useState({
@@ -91,16 +92,41 @@ export function ContactPage() {
               className="space-y-5"
               onSubmit={handleSubmit}
             >
-              {submitStatus === "success" && (
-                <div className="px-4 py-3 rounded-xl bg-teal/10 border border-teal/20 text-teal-light text-sm">
-                  Message sent successfully! We&apos;ll get back to you soon.
-                </div>
-              )}
-              {submitStatus === "error" && (
-                <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                  {errorMsg}
-                </div>
-              )}
+              <AnimatePresence mode="wait">
+                {submitStatus === "success" && (
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    className="flex items-center gap-3 px-5 py-4 rounded-xl bg-teal/10 border border-teal/20"
+                  >
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.15, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-teal-light shrink-0" />
+                    </motion.div>
+                    <div>
+                      <p className="text-teal-light text-sm font-medium">Message sent successfully!</p>
+                      <p className="text-teal-light/60 text-xs mt-0.5">We&apos;ll get back to you within 24 hours.</p>
+                    </div>
+                  </motion.div>
+                )}
+                {submitStatus === "error" && (
+                  <motion.div
+                    key="error"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+                  >
+                    {errorMsg}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="grid sm:grid-cols-2 gap-5">
                 <div>
@@ -178,9 +204,19 @@ export function ContactPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="btn-primary inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm rounded-xl w-full sm:w-auto disabled:opacity-50"
+                className="btn-primary inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm rounded-xl w-full sm:w-auto disabled:opacity-50 group"
               >
-                {submitting ? "Sending..." : "Send Message"}
+                {submitting ? (
+                  <>
+                    <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
+                    Send Message
+                  </>
+                )}
               </button>
             </form>
           </motion.div>

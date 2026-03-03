@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Toast, type ToastData } from "@/components/admin/toast";
-import { Activity, Search, Filter, Calendar } from "lucide-react";
+import { Activity, Search, Filter, Calendar, Download } from "lucide-react";
 
 interface AuditEntry {
   id: string;
@@ -62,6 +62,25 @@ export function ActivityPage() {
 
   const formatAction = (action: string) => action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
+  const exportCSV = () => {
+    const rows = filtered.map((e) => ({
+      Timestamp: e.timestamp,
+      Action: formatAction(e.action),
+      Target: (e.target || e.details || "").replace(/,/g, ";"),
+      User: e.userName || e.email || "Unknown",
+      Email: e.email || "",
+    }));
+    const headers = Object.keys(rows[0] || {}).join(",");
+    const csv = [headers, ...rows.map((r) => Object.values(r).map((v) => `"${v}"`).join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `activity-log-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const actionColorMap: Record<string, string> = { create: "text-emerald-400 bg-emerald-500/10", update: "text-teal-300 bg-teal-500/10", delete: "text-red-400 bg-red-500/10", reorder: "text-gold bg-gold/10", login: "text-blue-400 bg-blue-500/10" };
   const getActionColor = (action: string) => {
     const key = Object.keys(actionColorMap).find((k) => action.toLowerCase().includes(k));
@@ -77,7 +96,14 @@ export function ActivityPage() {
           <h1 className="font-heading font-bold text-2xl text-foreground">Activity Log</h1>
           <p className="text-muted-foreground text-sm mt-1">Audit trail of all admin actions.</p>
         </div>
-        <span className="text-xs text-muted-foreground/40">{entries.length} total entries</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-muted-foreground/40">{entries.length} total entries</span>
+          {filtered.length > 0 && (
+            <button onClick={exportCSV} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
+              <Download className="w-3.5 h-3.5" /> Export CSV
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filters */}

@@ -4,37 +4,37 @@ import { verifySession, requireRole } from "@/lib/firebase/auth-helpers";
 import { FieldValue } from "firebase-admin/firestore";
 import { logAction } from "@/lib/audit-log";
 import { sanitize } from "@/lib/sanitize";
-import { cached, invalidate } from "@/lib/cache";
+import { createCachedFetcher, invalidateCache } from "@/lib/cache";
 
-/** GET — List all team members (public, cached 60s) */
+/** Cached fetcher: public team (visible only) */
+const getPublicTeam = createCachedFetcher("team", async () => {
+  const snap = await adminDb.collection("team").orderBy("order", "asc").get();
+  return snap.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .filter((m: Record<string, unknown>) => m.visible !== false);
+}, ["team"]);
+
+/** Cached fetcher: all team members (admin) */
+const getAllTeam = createCachedFetcher("team_all", async () => {
+  const snap = await adminDb.collection("team").orderBy("order", "asc").get();
+  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}, ["team"]);
+
+/** GET — List team members (public or admin, persistent cache) */
 export async function GET(request: NextRequest) {
   const showAll = request.nextUrl.searchParams.get("all") === "1";
 
   try {
-    // ?all=1 requires editor+ auth — prevents public users from seeing hidden members
     if (showAll) {
       const session = await verifySession(request);
       requireRole(session.role, "editor");
+      return NextResponse.json(await getAllTeam());
     }
 
-    const cacheKey = showAll ? "team_all" : "team";
-    const team = await cached(cacheKey, async () => {
-      const snap = await adminDb
-        .collection("team")
-        .orderBy("order", "asc")
-        .get();
-      const docs = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      // Public endpoint: only return visible members
-      if (!showAll) return docs.filter((m: Record<string, unknown>) => m.visible !== false);
-      return docs;
+    return NextResponse.json(await getPublicTeam(), {
+      headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" },
     });
-    // Public requests get CDN-cached; admin (?all=1) do not
-    const headers: Record<string, string> = showAll
-      ? {}
-      : { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" };
-    return NextResponse.json(team, { headers });
   } catch (error: unknown) {
-    // Auth failures for ?all=1 should return 403, not empty array
     if (showAll) {
       const msg = error instanceof Error ? error.message : "Server error";
       const status = msg.includes("Insufficient") ? 403 : msg.includes("authenticated") ? 401 : 500;
@@ -68,8 +68,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const snap = await adminDb.collection("team").get();
-    const order = snap.size;
+    // Use count aggregation instead of fetching all docs (1 read vs N reads)
+    const countSnap = await adminDb.collection("team").count().get();
+    const order = countSnap.data().count;
 
     const docRef = await adminDb.collection("team").add({
       name,
@@ -85,8 +86,7 @@ export async function POST(request: NextRequest) {
     });
 
     await logAction(session.uid, session.name, "create", `created team member "${name}"`);
-    invalidate("team");
-    invalidate("team_all");
+    invalidateCache("team", "team_all");
 
     return NextResponse.json({
       id: docRef.id,
@@ -124,8 +124,7 @@ export async function PUT(request: NextRequest) {
       .update({ ...data, updatedAt: FieldValue.serverTimestamp() });
 
     await logAction(session.uid, session.name, "update", `updated team member "${data.name || id}"`);
-    invalidate("team");
-    invalidate("team_all");
+    invalidateCache("team", "team_all");
 
     return NextResponse.json({ message: "Team member updated!" });
   } catch (error: unknown) {
@@ -152,8 +151,7 @@ export async function DELETE(request: NextRequest) {
     const memberName = doc.data()?.name || id;
     await adminDb.collection("team").doc(id).delete();
     await logAction(session.uid, session.name, "delete", `deleted team member "${memberName}"`);
-    invalidate("team");
-    invalidate("team_all");
+    invalidateCache("team", "team_all");
 
     return NextResponse.json({ message: "Team member removed!" });
   } catch (error: unknown) {

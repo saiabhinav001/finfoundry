@@ -4,18 +4,20 @@ import { verifySession, requireRole } from "@/lib/firebase/auth-helpers";
 import { FieldValue } from "firebase-admin/firestore";
 import { logAction } from "@/lib/audit-log";
 import { sanitize } from "@/lib/sanitize";
-import { cached, invalidate } from "@/lib/cache";
+import { createCachedFetcher, invalidateCache } from "@/lib/cache";
 
-/** GET — List all resource categories (public, cached 60s) */
+const getResources = createCachedFetcher("resources", async () => {
+  const snap = await adminDb
+    .collection("resources")
+    .orderBy("order", "asc")
+    .get();
+  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}, ["resources"]);
+
+/** GET — List all resource categories (public, persistent cache) */
 export async function GET() {
   try {
-    const resources = await cached("resources", async () => {
-      const snap = await adminDb
-        .collection("resources")
-        .orderBy("order", "asc")
-        .get();
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    });
+    const resources = await getResources();
     return NextResponse.json(resources, {
       headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" },
     });
@@ -41,8 +43,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const snap = await adminDb.collection("resources").get();
-    const order = snap.size;
+    // Use count aggregation instead of fetching all docs (1 read vs N reads)
+    const countSnap = await adminDb.collection("resources").count().get();
+    const order = countSnap.data().count;
 
     const docRef = await adminDb.collection("resources").add({
       category,
@@ -53,7 +56,7 @@ export async function POST(request: NextRequest) {
     });
 
     await logAction(session.uid, session.name, "create", `created resource category "${category}"`);
-    invalidate("resources");
+    invalidateCache("resources");
 
     return NextResponse.json({
       id: docRef.id,
@@ -91,7 +94,7 @@ export async function PUT(request: NextRequest) {
       .update({ ...data, updatedAt: FieldValue.serverTimestamp() });
 
     await logAction(session.uid, session.name, "update", `updated resource category "${data.category || id}"`);
-    invalidate("resources");
+    invalidateCache("resources");
 
     return NextResponse.json({ message: "Resource category updated!" });
   } catch (error: unknown) {
@@ -118,7 +121,7 @@ export async function DELETE(request: NextRequest) {
     const categoryName = doc.data()?.category || id;
     await adminDb.collection("resources").doc(id).delete();
     await logAction(session.uid, session.name, "delete", `deleted resource category "${categoryName}"`);
-    invalidate("resources");
+    invalidateCache("resources");
 
     return NextResponse.json({ message: "Resource category deleted!" });
   } catch (error: unknown) {

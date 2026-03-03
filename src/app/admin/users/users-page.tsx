@@ -5,7 +5,7 @@ import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Toast, type ToastData } from "@/components/admin/toast";
 import { CustomSelect } from "@/components/admin/custom-select";
 import { useAuth } from "@/lib/auth-context";
-import { Shield, UserCheck, UserX, ArrowRightLeft, Trash2 } from "lucide-react";
+import { Shield, UserCheck, UserX, ArrowRightLeft, Trash2, Clock } from "lucide-react";
 import type { UserProfile, UserRole } from "@/types/firebase";
 import { ROLE_LABELS } from "@/lib/roles";
 
@@ -252,6 +252,9 @@ export function UsersPage() {
                   <th className="text-left text-xs font-medium text-muted-foreground px-5 py-3">
                     Status
                   </th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-5 py-3">
+                    Last Login
+                  </th>
                   <th className="text-right text-xs font-medium text-muted-foreground px-5 py-3">
                     Actions
                   </th>
@@ -332,6 +335,16 @@ export function UsersPage() {
                           />
                           {u.active ? "Active" : "Inactive"}
                         </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {u.lastLogin ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Clock className="w-3 h-3 text-muted-foreground/40" />
+                            {new Date(u.lastLogin).toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground/30">Never</span>
+                        )}
                       </td>
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -422,6 +435,12 @@ export function UsersPage() {
                         )}
                       </p>
                       <p className="text-xs text-muted-foreground">{u.email}</p>
+                      {u.lastLogin && (
+                        <p className="text-[10px] text-muted-foreground/40 flex items-center gap-1 mt-0.5">
+                          <Clock className="w-2.5 h-2.5" />
+                          Last login: {new Date(u.lastLogin).toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center justify-between">

@@ -30,6 +30,14 @@ const defaults: SettingsData = {
   logoUrl: "",
 };
 
+type Tab = "general" | "social" | "registration";
+
+const tabs: { key: Tab; label: string }[] = [
+  { key: "general", label: "General" },
+  { key: "social", label: "Contact & Social" },
+  { key: "registration", label: "Registration" },
+];
+
 export function SettingsPage() {
   const { role } = useAuth();
   const [settings, setSettings] = useState<SettingsData>(defaults);
@@ -37,6 +45,7 @@ export function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<ToastData | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("general");
 
   useUnsavedChanges(isDirty);
 
@@ -114,8 +123,25 @@ export function SettingsPage() {
         <div className="mb-6 p-4 rounded-xl bg-gold/[0.06] border border-gold/20 text-sm text-gold">Only admins can edit settings. You can view the current configuration below.</div>
       )}
 
-      <div className="space-y-6">
-        {/* General */}
+      {/* Tab Navigation */}
+      <div className="flex items-center gap-1 mb-6 p-1 rounded-xl bg-white/[0.02] border border-white/[0.06] w-fit">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              activeTab === tab.key
+                ? "bg-teal/[0.12] text-teal-light border border-teal/20"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "general" && (
         <div className="glass-card rounded-2xl p-6 md:p-8">
           <h2 className="font-heading font-semibold text-lg text-foreground mb-6">General</h2>
           <div className="grid sm:grid-cols-2 gap-5">
@@ -129,8 +155,9 @@ export function SettingsPage() {
             </div>
           </div>
         </div>
+      )}
 
-        {/* Contact & Socials */}
+      {activeTab === "social" && (
         <div className="glass-card rounded-2xl p-6 md:p-8">
           <h2 className="font-heading font-semibold text-lg text-foreground mb-6">Contact & Social Links</h2>
           <div className="grid sm:grid-cols-2 gap-5">
@@ -140,14 +167,15 @@ export function SettingsPage() {
             <Field label="WhatsApp Group" icon={Link2} field="whatsapp" placeholder="https://chat.whatsapp.com/..." />
           </div>
         </div>
+      )}
 
-        {/* Registration */}
+      {activeTab === "registration" && (
         <div className="glass-card rounded-2xl p-6 md:p-8">
           <h2 className="font-heading font-semibold text-lg text-foreground mb-6">Registration</h2>
           <Field label="Registration Link" icon={Link2} field="registrationLink" placeholder="https://forms.google.com/..." />
           <p className="text-xs text-muted-foreground/50 mt-2">This link is shown across the site for new member sign-ups.</p>
         </div>
-      </div>
+      )}
     </div>
   );
 }

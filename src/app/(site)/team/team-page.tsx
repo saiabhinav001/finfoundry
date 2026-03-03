@@ -23,6 +23,7 @@ export function TeamPage() {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeBatch, setActiveBatch] = useState<string>("");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
   useEffect(() => {
     fetch("/api/team")
@@ -50,8 +51,17 @@ export function TeamPage() {
 
   // Filter members by active batch
   const filteredMembers = useMemo(() => {
-    if (!activeBatch) return members;
-    return members.filter((m) => m.batch === activeBatch);
+    let result = members;
+    if (activeBatch) result = result.filter((m) => m.batch === activeBatch);
+    if (activeCategory !== "all") result = result.filter((m) => (m.category || "member") === activeCategory);
+    return result;
+  }, [members, activeBatch, activeCategory]);
+
+  // Available categories in filtered batch
+  const availableCategories = useMemo(() => {
+    const batchMembers = activeBatch ? members.filter((m) => m.batch === activeBatch) : members;
+    const cats = new Set(batchMembers.map((m) => m.category || "member"));
+    return [...cats];
   }, [members, activeBatch]);
 
   // Group by category: core committee first, then team heads, then members
@@ -97,6 +107,43 @@ export function TeamPage() {
                 Batch {batch}
               </button>
             ))}
+          </motion.div>
+        )}
+
+        {/* Category filter tabs — shown when multiple categories exist */}
+        {!loading && availableCategories.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-wrap items-center justify-center gap-2 mb-10"
+          >
+            <button
+              onClick={() => setActiveCategory("all")}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                activeCategory === "all" ? "filter-pill filter-pill-active" : "filter-pill"
+              }`}
+            >
+              All
+            </button>
+            {([
+              { key: "core_committee" as const, label: "Core Committee" },
+              { key: "team_head" as const, label: "Team Heads" },
+              { key: "member" as const, label: "Members" },
+            ] as const)
+              .filter((c) => availableCategories.includes(c.key))
+              .map((cat) => (
+                <button
+                  key={cat.key}
+                  onClick={() => setActiveCategory(cat.key)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                    activeCategory === cat.key ? "filter-pill filter-pill-active" : "filter-pill"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
           </motion.div>
         )}
 

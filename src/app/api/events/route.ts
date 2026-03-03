@@ -4,18 +4,20 @@ import { verifySession, requireRole } from "@/lib/firebase/auth-helpers";
 import { FieldValue } from "firebase-admin/firestore";
 import { logAction } from "@/lib/audit-log";
 import { sanitize } from "@/lib/sanitize";
-import { cached, invalidate } from "@/lib/cache";
+import { createCachedFetcher, invalidateCache } from "@/lib/cache";
 
-/** GET — List all events (public, cached 60s) */
+const getEvents = createCachedFetcher("events", async () => {
+  const snap = await adminDb
+    .collection("events")
+    .orderBy("createdAt", "desc")
+    .get();
+  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}, ["events"]);
+
+/** GET — List all events (public, persistent cache) */
 export async function GET() {
   try {
-    const events = await cached("events", async () => {
-      const snap = await adminDb
-        .collection("events")
-        .orderBy("createdAt", "desc")
-        .get();
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    });
+    const events = await getEvents();
     return NextResponse.json(events, {
       headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" },
     });
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
     });
 
     await logAction(session.uid, session.name, "create", `created event "${title}"`);
-    invalidate("events");
+    invalidateCache("events");
 
     return NextResponse.json({ id: docRef.id, message: "Event created!" });
   } catch (error: unknown) {
@@ -106,7 +108,7 @@ export async function PUT(request: NextRequest) {
       .update({ ...data, updatedAt: FieldValue.serverTimestamp() });
 
     await logAction(session.uid, session.name, "update", `updated event "${data.title || id}"`);
-    invalidate("events");
+    invalidateCache("events");
 
     return NextResponse.json({ message: "Event updated!" });
   } catch (error: unknown) {
@@ -134,7 +136,7 @@ export async function DELETE(request: NextRequest) {
     const title = doc.data()?.title || id;
     await adminDb.collection("events").doc(id).delete();
     await logAction(session.uid, session.name, "delete", `deleted event "${title}"`);
-    invalidate("events");
+    invalidateCache("events");
 
     return NextResponse.json({ message: "Event deleted!" });
   } catch (error: unknown) {
