@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { events as staticEvents } from "@/data/site-data";
@@ -36,18 +36,13 @@ const statusLabels: Record<string, string> = {
 
 type FilterType = "all" | "upcoming" | "ongoing" | "completed";
 
-export function EventsPage() {
-  const [filter, setFilter] = useState<FilterType>("all");
-  const [events, setEvents] = useState<EventItem[]>(staticEvents);
+interface EventsPageProps {
+  events: EventItem[];
+}
 
-  useEffect(() => {
-    fetch("/api/events")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setEvents(data);
-      })
-      .catch(() => {});
-  }, []);
+export function EventsPage({ events: serverEvents }: EventsPageProps) {
+  const [filter, setFilter] = useState<FilterType>("all");
+  const events: EventItem[] = serverEvents.length > 0 ? serverEvents : staticEvents;
 
   return (
     <>
@@ -59,13 +54,13 @@ export function EventsPage() {
 
       <SectionWrapper>
         {/* Filters */}
-        <div className="flex items-center justify-center gap-2 mb-14 flex-wrap">
+        <div className="flex items-center justify-center gap-2 mb-10 sm:mb-14 flex-wrap">
           {(["all", "upcoming", "ongoing", "completed"] as FilterType[]).map(
             (f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 filter-pill capitalize ${
+                className={`px-5 py-2.5 sm:py-2 rounded-full text-sm font-medium transition-all duration-200 filter-pill capitalize min-h-[44px] sm:min-h-0 ${
                   filter === f ? "filter-pill-active" : ""
                 }`}
               >
@@ -91,12 +86,12 @@ export function EventsPage() {
               <motion.div
                 key={event.title}
                 variants={fadeUp}
-                className={`group glass-card rounded-2xl p-7 transition-all duration-[250ms] ease-out hover:-translate-y-1 ${
+                className={`group glass-card rounded-2xl p-5 sm:p-7 transition-all duration-[250ms] ease-out hover:-translate-y-1 ${
                   !isVisible ? "hidden" : ""
                 }`}
               >
                 {event.imageURL && (
-                  <div className="mb-4 -mx-7 -mt-7 overflow-hidden rounded-t-2xl">
+                  <div className="mb-4 -mx-5 sm:-mx-7 -mt-5 sm:-mt-7 overflow-hidden rounded-t-2xl">
                     <img
                       src={event.imageURL}
                       alt={event.title}

@@ -49,6 +49,7 @@ export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
   const isAdmin = role ? canManageUsers(role) : false;
 
   // Fetch unread message count — lightweight aggregation endpoint (1 Firestore read, cached)
+  // Re-fetches on navigation (pathname change) instead of polling every 5 min
   useEffect(() => {
     const fetchUnread = async () => {
       try {
@@ -58,9 +59,7 @@ export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
       } catch { /* silent */ }
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 300000); // refresh every 5 min
-    return () => clearInterval(interval);
-  }, []);
+  }, [pathname]);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
@@ -82,7 +81,7 @@ export function AdminSidebar({ mobileOpen, onMobileClose }: AdminSidebarProps) {
             </div>
           </Link>
           {/* Mobile close button */}
-          <button onClick={onMobileClose} className="lg:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all">
+          <button onClick={onMobileClose} className="lg:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>

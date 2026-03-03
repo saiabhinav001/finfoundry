@@ -467,17 +467,17 @@ export function UsersPage() {
                     </div>
                     {!isMe &&
                       myRole === "super_admin" && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <button
                             onClick={() => handleToggleActive(u)}
-                            className="text-xs text-muted-foreground hover:text-foreground"
+                            className="text-xs text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] px-2 flex items-center justify-center"
                           >
                             {u.active ? "Deactivate" : "Activate"}
                           </button>
                           <span className="text-white/10">|</span>
                           <button
                             onClick={() => handleDeleteUser(u)}
-                            className="text-xs text-red-400/70 hover:text-red-400"
+                            className="text-xs text-red-400/70 hover:text-red-400 min-h-[44px] min-w-[44px] px-2 flex items-center justify-center"
                           >
                             Delete
                           </button>

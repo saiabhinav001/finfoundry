@@ -135,10 +135,25 @@ export function EasterEgg() {
   const keysRef = useRef<string[]>([]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Never intercept keys when user is focused on a form element
+    const active = document.activeElement;
+    if (active) {
+      const tag = active.tagName;
+      if (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT" ||
+        (active as HTMLElement).isContentEditable ||
+        active.closest("form")
+      ) {
+        return;
+      }
+    }
+
     const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
 
-    // Prevent arrow key scrolling when user is mid-sequence
-    if (keysRef.current.length > 0 && KONAMI_KEYS.has(e.key)) {
+    // Only prevent default for arrow keys during mid-sequence
+    if (keysRef.current.length > 0 && e.key.startsWith("Arrow")) {
       e.preventDefault();
     }
 

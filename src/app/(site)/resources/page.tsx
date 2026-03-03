@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ResourcesPage } from "./resources-page";
+import { getResources } from "@/lib/db";
 
 export const metadata: Metadata = {
   title: "Resources",
@@ -7,6 +8,7 @@ export const metadata: Metadata = {
     "Curated books, courses, and tools recommended by CBIT FinFoundry for mastering financial literacy.",
 };
 
-export default function Page() {
-  return <ResourcesPage />;
+export default async function Page() {
+  const resources = await getResources().catch(() => []);
+  return <ResourcesPage resources={resources} />;
 }

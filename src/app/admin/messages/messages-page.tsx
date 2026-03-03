@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Toast, type ToastData } from "@/components/admin/toast";
+import { ExpandingSearch } from "@/components/admin/expanding-search";
 import {
   MessageSquare,
   Trash2,
@@ -147,14 +148,19 @@ export function MessagesPage() {
   };
 
   const exportCSV = () => {
-    const rows = [["Name", "Email", "Subject", "Message", "Date", "Read"]];
-    messages.forEach((m) => rows.push([m.name, m.email, m.subject, m.message.replace(/"/g, '""'), m.createdAt || "", m.read ? "Yes" : "No"]));
-    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const headers = ["Name", "Email", "Subject", "Message", "Date", "Read"];
+    const dataRows = messages.map((m) => [
+      m.name, m.email, m.subject, m.message, m.createdAt || "", m.read ? "Yes" : "No",
+    ]);
+    const csv = [headers.map(esc).join(","), ...dataRows.map((r) => r.map(esc).join(","))].join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `messages-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click(); URL.revokeObjectURL(url);
+    a.href = url;
+    a.download = `messages-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const unreadCount = messages.filter((m) => !m.read).length;
@@ -168,7 +174,7 @@ export function MessagesPage() {
     <div>
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-foreground">Messages</h1>
           <p className="text-muted-foreground text-sm mt-1">
@@ -177,8 +183,8 @@ export function MessagesPage() {
           </p>
         </div>
         {messages.length > 0 && (
-          <button onClick={exportCSV} className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
-            <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export CSV</span>
+          <button onClick={exportCSV} className="self-start inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
+            <Download className="w-4 h-4" /> Export CSV
           </button>
         )}
       </div>
@@ -186,19 +192,15 @@ export function MessagesPage() {
       {/* Toolbar */}
       {messages.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search messages..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/40 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
-          </div>
+          <ExpandingSearch value={search} onChange={setSearch} placeholder="Search messages..." className="flex-1" />
           <div className="flex items-center gap-1.5">
             {(["all", "unread", "read"] as const).map((f) => (
-              <button key={f} onClick={() => setFilterRead(f)} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${filterRead === f ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>
+              <button key={f} onClick={() => setFilterRead(f)} className={`px-2.5 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium capitalize transition-colors ${filterRead === f ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>
                 {f}{f === "unread" && unreadCount > 0 ? ` (${unreadCount})` : ""}
               </button>
             ))}
           </div>
-          <button onClick={toggleSelectAll} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06] transition-all duration-200 shrink-0">
+          <button onClick={toggleSelectAll} className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06] transition-all duration-200 shrink-0">
             {selectedIds.size === filteredMessages.length && filteredMessages.length > 0 ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
             {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select"}
           </button>
@@ -209,9 +211,9 @@ export function MessagesPage() {
       {selectedIds.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
           <span className="text-sm text-foreground/80">{selectedIds.size} selected</span>
-          <button onClick={() => handleBulkRead(true)} className="px-3 py-1.5 rounded-lg text-xs text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all">Read</button>
-          <button onClick={() => handleBulkRead(false)} className="px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all">Unread</button>
-          <button onClick={() => setShowBulkConfirm(true)} className="px-3 py-1.5 rounded-lg text-xs text-red-400 hover:bg-red-500/[0.06] border border-red-500/[0.15] transition-all">
+          <button onClick={() => handleBulkRead(true)} className="px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all">Read</button>
+          <button onClick={() => handleBulkRead(false)} className="px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs text-muted-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all">Unread</button>
+          <button onClick={() => setShowBulkConfirm(true)} className="px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs text-red-400 hover:bg-red-500/[0.06] border border-red-500/[0.15] transition-all">
             <Trash2 className="w-3 h-3 inline mr-1" /> Delete
           </button>
           <button onClick={() => setSelectedIds(new Set())} className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-auto">Clear</button>
@@ -240,7 +242,7 @@ export function MessagesPage() {
           <div className={`lg:col-span-2 space-y-2 ${selectedMessage ? "hidden lg:block" : ""}`}>
             {filteredMessages.map((msg) => (
               <div key={msg.id} className="flex items-start gap-2">
-                <button onClick={() => toggleSelect(msg.id)} className="mt-4 shrink-0 text-muted-foreground/40 hover:text-teal-light transition-colors">
+                <button onClick={() => toggleSelect(msg.id)} className="mt-2.5 shrink-0 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center text-muted-foreground/40 hover:text-teal-light transition-colors">
                   {selectedIds.has(msg.id) ? <CheckSquare className="w-3.5 h-3.5 text-teal-light" /> : <Square className="w-3.5 h-3.5" />}
                 </button>
                 <button onClick={() => openMessage(msg)} className={`flex-1 text-left glass-card rounded-xl p-4 transition-all hover:bg-white/[0.03] ${selectedMessage?.id === msg.id ? "border-teal/20 bg-teal/[0.03]" : ""} ${!msg.read ? "border-l-2 border-l-teal-light" : ""}`}>
@@ -269,6 +271,9 @@ export function MessagesPage() {
                   transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   className="glass-card rounded-2xl p-6 md:p-8"
                 >
+                  <button onClick={() => setSelectedMessage(null)} className="lg:hidden inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 min-h-[44px]">
+                    <X className="w-4 h-4" /> Back to messages
+                  </button>
                   <div className="flex items-start justify-between mb-6">
                     <div>
                       <h2 className="font-heading font-semibold text-lg text-foreground">{selectedMessage.subject}</h2>
@@ -276,11 +281,11 @@ export function MessagesPage() {
                       <p className="text-xs text-muted-foreground/60 mt-0.5">{formatDate(selectedMessage.createdAt)}</p>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <button onClick={() => toggleRead(selectedMessage)} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-200" title={selectedMessage.read ? "Mark unread" : "Mark read"}>
+                      <button onClick={() => toggleRead(selectedMessage)} className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-200" title={selectedMessage.read ? "Mark unread" : "Mark read"}>
                         {selectedMessage.read ? <Mail className="w-4 h-4" /> : <MailOpen className="w-4 h-4" />}
                       </button>
-                      <button onClick={() => setDeleteTarget(selectedMessage)} className="p-2 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/[0.06] transition-all duration-200"><Trash2 className="w-4 h-4" /></button>
-                      <button onClick={() => setSelectedMessage(null)} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-200" title="Close"><X className="w-4 h-4" /></button>
+                      <button onClick={() => setDeleteTarget(selectedMessage)} className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/[0.06] transition-all duration-200"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => setSelectedMessage(null)} className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-200" title="Close"><X className="w-4 h-4" /></button>
                     </div>
                   </div>
                   <div className="border-t border-white/[0.06] pt-6"><p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{selectedMessage.message}</p></div>

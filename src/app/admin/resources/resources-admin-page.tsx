@@ -19,6 +19,7 @@ import {
 import { SortableItem } from "@/components/admin/sortable-item";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Toast, type ToastData } from "@/components/admin/toast";
+import { ExpandingSearch } from "@/components/admin/expanding-search";
 import { useAuth } from "@/lib/auth-context";
 import {
   Plus,
@@ -146,16 +147,16 @@ export function ResourcesAdminPage() {
     <div>
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-foreground">Resources</h1>
           <p className="text-muted-foreground text-sm mt-1">Manage resource categories and learning materials.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <a href="/resources" target="_blank" rel="noopener noreferrer" className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
             <ExternalLink className="w-4 h-4" /> Preview
           </a>
-          <button onClick={openNew} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light transition-colors duration-200">
+          <button onClick={openNew} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light transition-colors duration-200 w-full sm:w-auto">
             <Plus className="w-4 h-4" /> Add Category
           </button>
         </div>
@@ -163,11 +164,7 @@ export function ResourcesAdminPage() {
 
       {/* Search */}
       {categories.length > 0 && (
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search categories or items..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/40 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
-        </div>
+        <ExpandingSearch value={search} onChange={setSearch} placeholder="Search categories or items..." className="mb-6" />
       )}
 
       {/* Form */}
@@ -201,20 +198,20 @@ export function ResourcesAdminPage() {
                     </div>
                     <div className="grid sm:grid-cols-2 gap-3">
                       <input value={item.title} onChange={(e) => updateItem(idx, "title", e.target.value)} placeholder="Title"
-                        className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
+                        className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
                       <input value={item.author} onChange={(e) => updateItem(idx, "author", e.target.value)} placeholder="Author"
-                        className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
+                        className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
                       <input value={item.description} onChange={(e) => updateItem(idx, "description", e.target.value)} placeholder="Brief description"
-                        className="sm:col-span-2 w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
+                        className="sm:col-span-2 w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-end gap-3 mt-8">
-            <button onClick={() => setShowForm(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">Cancel</button>
-            <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light disabled:opacity-50 transition-colors duration-200">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 mt-8">
+            <button onClick={() => setShowForm(false)} className="px-5 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 w-full sm:w-auto">Cancel</button>
+            <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light disabled:opacity-50 transition-colors duration-200 w-full sm:w-auto">
               {saving ? "Saving..." : editingId ? "Save Changes" : "Create Category"}
             </button>
           </div>
@@ -264,12 +261,12 @@ export function ResourcesAdminPage() {
                           {item.description && <p className="text-xs text-muted-foreground/70 mt-1">{item.description}</p>}
                         </div>
                       ))}
-                      <div className="flex items-center gap-2 pt-2">
-                        <button onClick={() => openEdit(cat)} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200">
+                      <div className="flex flex-wrap items-center gap-2 pt-2">
+                        <button onClick={() => openEdit(cat)} className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] sm:min-h-0 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200">
                           <Pencil className="w-3.5 h-3.5" /> Edit Category
                         </button>
                         {isAdmin && (
-                          <button onClick={() => setDeleteTarget(cat)} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] border border-white/[0.06] transition-all duration-200">
+                          <button onClick={() => setDeleteTarget(cat)} className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] sm:min-h-0 rounded-lg text-sm text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] border border-white/[0.06] transition-all duration-200">
                             <Trash2 className="w-3.5 h-3.5" /> Delete Category
                           </button>
                         )}

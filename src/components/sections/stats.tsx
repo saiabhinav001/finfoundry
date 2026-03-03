@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { stats as staticStats } from "@/data/site-data";
 import { perspectiveRise, staggerPerspective, viewportCard } from "@/lib/motion";
 import { AnimatedCounter } from "@/components/shared/animated-counter";
 
@@ -18,23 +16,11 @@ import { AnimatedCounter } from "@/components/shared/animated-counter";
  *
  * SOP compliance: §4, §7, §8, §9
  * ═══════════════════════════════════════════════════════════════════ */
-export function StatsSection() {
-  const [stats, setStats] = useState(staticStats);
+interface StatsSectionProps {
+  stats: { value: string; label: string }[];
+}
 
-  useEffect(() => {
-    fetch("/api/about")
-      .then((r) => r.json())
-      .then((data) => {
-        if (
-          data.stats &&
-          Array.isArray(data.stats) &&
-          data.stats.length > 0 &&
-          data.stats.every((s: { value?: string }) => typeof s.value === "string")
-        )
-          setStats(data.stats);
-      })
-      .catch(() => {});
-  }, []);
+export function StatsSection({ stats }: StatsSectionProps) {
   return (
     <section className="relative py-16 md:py-20 lg:py-28 border-y border-white/[0.03] bg-surface overflow-hidden">
       <div className="content-glow" />
@@ -63,7 +49,7 @@ export function StatsSection() {
             <motion.div
               key={stat.label}
               variants={perspectiveRise}
-              className="glass-stat rounded-2xl p-6 sm:p-8 text-center group cursor-default"
+              className="glass-stat rounded-2xl p-4 sm:p-6 lg:p-8 text-center group cursor-default"
               style={{ transformStyle: "preserve-3d" }}
             >
               <div className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-gradient-gold tracking-[-0.03em]">

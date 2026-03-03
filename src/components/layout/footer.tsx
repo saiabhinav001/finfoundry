@@ -32,7 +32,7 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="relative border-t border-white/[0.04] bg-[#030610] overflow-hidden">
+    <footer aria-label="Site footer" className="relative border-t border-white/[0.04] bg-[#030610] overflow-hidden">
       {/* Subtle aurora glow at top */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[200px] pointer-events-none"
@@ -67,26 +67,26 @@ export function Footer() {
                 href={links.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg neo-icon flex items-center justify-center text-muted-foreground hover:text-teal-light transition-all duration-200"
+                className="w-11 h-11 rounded-lg neo-icon flex items-center justify-center text-muted-foreground hover:text-teal-light transition-all duration-200"
                 aria-label="Instagram"
               >
-                <FaInstagram className="w-3.5 h-3.5" />
+                <FaInstagram className="w-4 h-4" />
               </a>
               <a
                 href={links.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg neo-icon flex items-center justify-center text-muted-foreground hover:text-teal-light transition-all duration-200"
+                className="w-11 h-11 rounded-lg neo-icon flex items-center justify-center text-muted-foreground hover:text-teal-light transition-all duration-200"
                 aria-label="LinkedIn"
               >
-                <FaLinkedinIn className="w-3.5 h-3.5" />
+                <FaLinkedinIn className="w-4 h-4" />
               </a>
               <a
                 href={`mailto:${links.email}`}
-                className="w-9 h-9 rounded-lg neo-icon flex items-center justify-center text-muted-foreground hover:text-teal-light transition-all duration-200"
+                className="w-11 h-11 rounded-lg neo-icon flex items-center justify-center text-muted-foreground hover:text-teal-light transition-all duration-200"
                 aria-label="Email"
               >
-                <HiOutlineMail className="w-3.5 h-3.5" />
+                <HiOutlineMail className="w-4 h-4" />
               </a>
             </div>
           </div>

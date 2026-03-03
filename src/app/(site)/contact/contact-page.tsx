@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
-import { siteConfig } from "@/data/site-data";
 import { FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { HiOutlineMail, HiOutlineLocationMarker } from "react-icons/hi";
 import { fadeUp, stagger, viewport } from "@/lib/motion";
 import { PageHero } from "@/components/shared/page-hero";
 import { CheckCircle2, Send } from "lucide-react";
 
-export function ContactPage() {
+interface ContactPageProps {
+  links: { instagram: string; linkedin: string; email: string };
+}
+
+export function ContactPage({ links }: ContactPageProps) {
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -22,23 +25,6 @@ export function ContactPage() {
     "idle" | "success" | "error"
   >("idle");
   const [errorMsg, setErrorMsg] = useState("");
-
-  /* Fetch live social links from Firestore settings */
-  const [links, setLinks] = useState(siteConfig.links);
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data && !data.error) {
-          setLinks({
-            instagram: data.instagram || siteConfig.links.instagram,
-            linkedin: data.linkedin || siteConfig.links.linkedin,
-            email: data.email || siteConfig.links.email,
-          });
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -274,7 +260,7 @@ export function ContactPage() {
                   href={links.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-input text-sm text-foreground hover:border-teal/30 transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-input text-sm text-foreground hover:border-teal/30 transition-all duration-200 min-h-[44px]"
                 >
                   <FaInstagram className="w-4 h-4" />
                   Instagram
@@ -283,7 +269,7 @@ export function ContactPage() {
                   href={links.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-input text-sm text-foreground hover:border-teal/30 transition-all duration-200"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-input text-sm text-foreground hover:border-teal/30 transition-all duration-200 min-h-[44px]"
                 >
                   <FaLinkedinIn className="w-4 h-4" />
                   LinkedIn

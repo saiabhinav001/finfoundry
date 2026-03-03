@@ -120,16 +120,16 @@ export function ProgramsAdminPage() {
     <div>
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-foreground">Programs</h1>
           <p className="text-muted-foreground text-sm mt-1">Manage learning programs displayed on the website.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <a href="/programs" target="_blank" rel="noopener noreferrer" className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
             <ExternalLink className="w-4 h-4" /> Preview
           </a>
-          <button onClick={openNew} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light transition-colors duration-200">
+          <button onClick={openNew} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light transition-colors duration-200 w-full sm:w-auto">
             <Plus className="w-4 h-4" /> Add Program
           </button>
         </div>
@@ -159,9 +159,9 @@ export function ProgramsAdminPage() {
               <CustomSelect value={form.icon} options={ICON_OPTIONS.map((i) => ({ value: i, label: i }))} onChange={(val) => setForm({ ...form, icon: val })} />
             </div>
           </div>
-          <div className="flex items-center justify-end gap-3 mt-8">
-            <button onClick={() => setShowForm(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">Cancel</button>
-            <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light disabled:opacity-50 transition-colors duration-200">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 mt-8">
+            <button onClick={() => setShowForm(false)} className="px-5 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 w-full sm:w-auto">Cancel</button>
+            <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light disabled:opacity-50 transition-colors duration-200 w-full sm:w-auto">
               {saving ? "Saving..." : editingId ? "Save Changes" : "Create Program"}
             </button>
           </div>
@@ -192,15 +192,15 @@ export function ProgramsAdminPage() {
                       <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{program.description}</p>
                       <p className="text-xs text-muted-foreground/50 mt-1">Icon: {program.icon}</p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button onClick={() => duplicateProgram(program)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200" title="Duplicate">
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <button onClick={() => duplicateProgram(program)} className="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] sm:min-h-0 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200" title="Duplicate">
                         <Copy className="w-3.5 h-3.5" />
                       </button>
-                      <button onClick={() => openEdit(program)} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200">
+                      <button onClick={() => openEdit(program)} className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] sm:min-h-0 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200">
                         <Pencil className="w-3.5 h-3.5" /> Edit
                       </button>
                       {isAdmin && (
-                        <button onClick={() => setDeleteTarget(program)} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] border border-white/[0.06] transition-all duration-200">
+                        <button onClick={() => setDeleteTarget(program)} className="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] sm:min-h-0 rounded-lg text-sm text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] border border-white/[0.06] transition-all duration-200">
                           <Trash2 className="w-3.5 h-3.5" /> Delete
                         </button>
                       )}

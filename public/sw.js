@@ -1,20 +1,20 @@
 /* ═══════════════════════════════════════════════════════════════════
- * FinFoundry Service Worker v2.0 — Offline-first PWA support
+ * FinFoundry Service Worker v3.0 — Offline-first PWA support
  *
- * Caches the offline page + essential assets so the app degrades
+ * Caches a self-contained offline.html + icons so the app degrades
  * gracefully when the user has no internet connection.
  *
  * Strategy:
- *   - Install: precache /offline + icons
+ *   - Install: precache /offline.html (self-contained, zero deps) + icons
  *   - Activate: clean old caches
- *   - Fetch (navigate): network-first, fall back to /offline
- *   - Fetch (JS/CSS): stale-while-revalidate (enables offline page hydration)
+ *   - Fetch (navigate): network-first, fall back to /offline.html
+ *   - Fetch (JS/CSS): stale-while-revalidate
  *   - Fetch (other): network-only (Next.js handles its own caching)
  * ═══════════════════════════════════════════════════════════════════ */
 
-const CACHE_NAME = "finfoundry-offline-v2";
-const OFFLINE_URL = "/offline";
-const ASSET_CACHE = "finfoundry-assets-v1";
+const CACHE_NAME = "finfoundry-offline-v3";
+const OFFLINE_URL = "/offline.html";
+const ASSET_CACHE = "finfoundry-assets-v2";
 
 const PRECACHE = [OFFLINE_URL, "/icon-192x192.png", "/icon-512x512.png"];
 
@@ -41,6 +41,12 @@ self.addEventListener("activate", (event) => {
         )
       )
       .then(() => self.clients.claim())
+      .then(() =>
+        // Notify all open tabs to refresh so they pick up the new SW
+        self.clients.matchAll({ type: "window" }).then((clients) =>
+          clients.forEach((client) => client.navigate(client.url))
+        )
+      )
   );
 });
 

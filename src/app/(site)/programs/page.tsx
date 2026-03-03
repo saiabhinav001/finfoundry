@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ProgramsPage } from "./programs-page";
 import { breadcrumbJsonLd } from "@/lib/json-ld";
+import { getPrograms } from "@/lib/db";
 
 export const metadata: Metadata = {
   title: "Programs",
@@ -10,11 +11,12 @@ export const metadata: Metadata = {
 
 const jsonLd = breadcrumbJsonLd([{ name: "Programs", path: "/programs" }]);
 
-export default function Page() {
+export default async function Page() {
+  const programs = await getPrograms().catch(() => []);
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <ProgramsPage />
+      <ProgramsPage programs={programs} />
     </>
   );
 }

@@ -102,17 +102,17 @@ export function SettingsPage() {
     <div>
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-foreground">Settings</h1>
           <p className="text-muted-foreground text-sm mt-1">Global site configuration and social links.{isDirty && <span className="text-gold ml-2">● Unsaved changes</span>}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <a href="/" target="_blank" rel="noopener noreferrer" className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
             <ExternalLink className="w-4 h-4" /> View Site
           </a>
           {isAdmin && (
-            <button onClick={handleSave} disabled={saving} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light disabled:opacity-50 transition-colors duration-200">
+            <button onClick={handleSave} disabled={saving} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light disabled:opacity-50 transition-colors duration-200 w-full sm:w-auto">
               <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Settings"}
             </button>
           )}
@@ -124,12 +124,12 @@ export function SettingsPage() {
       )}
 
       {/* Tab Navigation */}
-      <div className="flex items-center gap-1 mb-6 p-1 rounded-xl bg-white/[0.02] border border-white/[0.06] w-fit">
+      <div className="flex items-center gap-1 mb-6 p-1 rounded-xl bg-white/[0.02] border border-white/[0.06] w-full sm:w-fit overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+            className={`flex-1 sm:flex-initial px-4 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
               activeTab === tab.key
                 ? "bg-teal/[0.12] text-teal-light border border-teal/20"
                 : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"

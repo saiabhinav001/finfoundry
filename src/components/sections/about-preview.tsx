@@ -7,9 +7,15 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { HiArrowRight } from "react-icons/hi";
 import { fadeUp, viewport } from "@/lib/motion";
 
+const steps = [
+  { num: "01", title: "Learn", desc: "Expert-led workshops and courses", variant: "teal" as const },
+  { num: "02", title: "Practice", desc: "Simulated trading & real case studies", variant: "teal" as const },
+  { num: "03", title: "Excel", desc: "Compete, network, and grow your career", variant: "gold" as const },
+];
+
 export function AboutPreview() {
   return (
-    <SectionWrapper>
+    <SectionWrapper className="!overflow-visible">
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
         <div>
           <SectionHeading
@@ -60,34 +66,26 @@ export function AboutPreview() {
           viewport={viewport}
           className="relative"
         >
-          <div className="glass-card rounded-2xl p-8 space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl neo-icon flex items-center justify-center">
-                <span className="text-teal-light/80 text-lg font-heading font-bold">01</span>
-              </div>
-              <div>
-                <h4 className="font-heading font-semibold text-foreground">Learn</h4>
-                <p className="text-sm text-muted-foreground">Expert-led workshops and courses</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl neo-icon flex items-center justify-center">
-                <span className="text-teal-light/80 text-lg font-heading font-bold">02</span>
-              </div>
-              <div>
-                <h4 className="font-heading font-semibold text-foreground">Practice</h4>
-                <p className="text-sm text-muted-foreground">Simulated trading & real case studies</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl neo-icon-gold flex items-center justify-center">
-                <span className="text-gold/80 text-lg font-heading font-bold">03</span>
-              </div>
-              <div>
-                <h4 className="font-heading font-semibold text-foreground">Excel</h4>
-                <p className="text-sm text-muted-foreground">Compete, network, and grow your career</p>
-              </div>
-            </div>
+          <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-2">
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.num}
+                className="flex items-center gap-4 rounded-xl p-3 -mx-1 cursor-default transition-colors duration-300 hover:bg-white/[0.04]"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.5, delay: 0.15 * i, ease: [0.4, 0, 0.2, 1] }}
+                whileHover={{ x: 6 }}
+              >
+                <div className={`w-12 h-12 rounded-xl ${step.variant === "gold" ? "neo-icon-gold" : "neo-icon"} flex items-center justify-center shrink-0`}>
+                  <span className={`${step.variant === "gold" ? "text-gold/80" : "text-teal-light/80"} text-lg font-heading font-bold`}>{step.num}</span>
+                </div>
+                <div>
+                  <h4 className="font-heading font-semibold text-foreground">{step.title}</h4>
+                  <p className="text-sm text-muted-foreground">{step.desc}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
           <div className="absolute -top-6 -right-6 w-28 h-28 bg-gradient-to-br from-teal/[0.04] to-transparent rounded-full blur-3xl" />
           <div className="absolute -bottom-6 -left-6 w-36 h-36 bg-gradient-to-br from-gold/[0.03] to-transparent rounded-full blur-3xl" />

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
@@ -16,18 +15,12 @@ const statusColors: Record<string, string> = {
   completed: "text-muted-foreground bg-white/[0.03] border-white/[0.06]",
 };
 
-export function EventsPreview() {
-  const [events, setEvents] = useState(staticEvents);
+interface EventsPreviewProps {
+  events?: { title: string; date: string; type: string; status: string; description: string }[];
+}
 
-  useEffect(() => {
-    fetch("/api/events")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setEvents(data);
-      })
-      .catch(() => {});
-  }, []);
-
+export function EventsPreview({ events: propEvents }: EventsPreviewProps) {
+  const events = propEvents ?? staticEvents;
   const previewEvents = events.slice(0, 3);
 
   return (

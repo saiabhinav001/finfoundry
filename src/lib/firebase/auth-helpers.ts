@@ -48,7 +48,7 @@ export async function verifySession(
       uid: decoded.uid,
       role: claimsRole,
       email: decoded.email || "",
-      name: decoded.name || decoded.email?.split("@")[0] || "",
+      name: decoded.name || decoded.email?.split("@")[0] || "User",
     };
   }
 
@@ -74,7 +74,7 @@ export async function verifySession(
     uid: decoded.uid,
     role,
     email: data.email || decoded.email || "",
-    name: data.name || "",
+    name: data.name || decoded.name || decoded.email?.split("@")[0] || "User",
   };
 }
 
@@ -103,7 +103,7 @@ export async function verifySessionFull(
     uid: decoded.uid,
     role: data.role as UserRole,
     email: data.email || decoded.email || "",
-    name: data.name || "",
+    name: data.name || decoded.name || decoded.email?.split("@")[0] || "User",
   };
 }
 

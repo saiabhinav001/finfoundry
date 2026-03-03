@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Toast, type ToastData } from "@/components/admin/toast";
+import { CustomSelect } from "@/components/admin/custom-select";
+import { ExpandingSearch } from "@/components/admin/expanding-search";
 import { Activity, Search, Filter, Calendar, Download, RefreshCw } from "lucide-react";
 
 interface AuditEntry {
@@ -73,16 +75,17 @@ export function ActivityPage() {
   const formatAction = (action: string) => action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   const exportCSV = () => {
-    const rows = filtered.map((e) => ({
-      Timestamp: e.timestamp,
-      Action: formatAction(e.action),
-      Target: (e.target || e.details || "").replace(/,/g, ";"),
-      User: e.userName || e.email || "Unknown",
-      Email: e.email || "",
-    }));
-    const headers = Object.keys(rows[0] || {}).join(",");
-    const csv = [headers, ...rows.map((r) => Object.values(r).map((v) => `"${v}"`).join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const headers = ["Timestamp", "Action", "Target", "User", "Email"];
+    const dataRows = filtered.map((e) => [
+      e.timestamp,
+      formatAction(e.action),
+      e.target || e.details || "",
+      e.userName || e.email || "Unknown",
+      e.email || "",
+    ]);
+    const csv = [headers.map(esc).join(","), ...dataRows.map((r) => r.map(esc).join(","))].join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -101,13 +104,13 @@ export function ActivityPage() {
     <div>
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-foreground">Activity Log</h1>
           <p className="text-muted-foreground text-sm mt-1">Audit trail of all admin actions.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground/40">{entries.length} total entries</span>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <span className="text-xs text-muted-foreground/40 hidden sm:block">{entries.length} total entries</span>
           <button
             onClick={async () => {
               setRefreshing(true);
@@ -116,12 +119,12 @@ export function ActivityPage() {
               showToast("Activity log refreshed.", "success");
             }}
             disabled={refreshing}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Refresh
           </button>
           {filtered.length > 0 && (
-            <button onClick={exportCSV} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
+            <button onClick={exportCSV} className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
           )}
@@ -131,26 +134,35 @@ export function ActivityPage() {
       {/* Filters */}
       {entries.length > 0 && (
         <div className="flex flex-col md:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search user, action, details..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/40 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
-          </div>
+          <ExpandingSearch value={search} onChange={setSearch} placeholder="Search user, action, details..." className="flex-1" />
           <div className="flex items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 hidden md:block" />
-            <select value={filterAction} onChange={(e) => setFilterAction(e.target.value)}
-              className="px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground text-sm focus:outline-none focus:border-teal/30 appearance-none cursor-pointer">
-              <option value="all">All Actions</option>
-              {actionTypes.map((a) => (<option key={a} value={a}>{formatAction(a)}</option>))}
-            </select>
+            <CustomSelect
+              value={filterAction}
+              options={[{ value: "all", label: "All Actions" }, ...actionTypes.map((a) => ({ value: a, label: formatAction(a) }))]}
+              onChange={setFilterAction}
+              placeholder="All Actions"
+              size="sm"
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 hidden md:block" />
-            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground text-sm focus:outline-none focus:border-teal/30 [color-scheme:dark]"/>
-            <span className="text-xs text-muted-foreground/40">to</span>
-            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground text-sm focus:outline-none focus:border-teal/30 [color-scheme:dark]"/>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:flex-1 sm:min-w-[130px]">
+              <Calendar className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+              <div className="relative flex-1">
+                <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-full px-3 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-all duration-200 [color-scheme:dark]"/>
+                {!dateFrom && <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/40">From date</span>}
+              </div>
+            </div>
+            <span className="text-xs text-muted-foreground/40 text-center">to</span>
+            <div className="flex items-center gap-2 w-full sm:flex-1 sm:min-w-[130px]">
+              <Calendar className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 sm:hidden" />
+              <div className="relative flex-1">
+                <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+                  className="w-full px-3 py-2.5 sm:py-2 min-h-[44px] sm:min-h-0 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-all duration-200 [color-scheme:dark]"/>
+                {!dateTo && <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground/40">To date</span>}
+              </div>
+            </div>
           </div>
         </div>
       )}

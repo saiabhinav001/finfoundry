@@ -48,7 +48,7 @@ export function ConfirmDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 6 }}
             transition={{ duration: 0.2, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-md rounded-2xl border border-white/[0.08] bg-surface-raised p-8 shadow-2xl"
+            className="relative w-full max-w-md rounded-2xl border border-white/[0.08] bg-surface-raised p-5 sm:p-8 shadow-2xl"
           >
             {/* Icon */}
             <div
@@ -72,16 +72,16 @@ export function ConfirmDialog({
               {message}
             </p>
 
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
               <button
                 onClick={onCancel}
-                className="px-5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.06] border border-white/[0.08] transition-all duration-200"
+                className="px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.06] border border-white/[0.08] transition-all duration-200"
               >
                 {cancelLabel}
               </button>
               <button
                 onClick={onConfirm}
-                className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                className={`px-5 py-2.5 min-h-[44px] rounded-xl text-sm font-semibold transition-all duration-200 ${
                   danger
                     ? "bg-red-500/90 text-white hover:bg-red-500"
                     : "bg-teal text-white hover:bg-teal-light"

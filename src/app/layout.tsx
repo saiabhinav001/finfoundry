@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import { SmoothScroll } from "@/components/shared/smooth-scroll";
+import { ClientSmoothScroll } from "@/components/shared/client-smooth-scroll";
 import { AuthProvider } from "@/lib/auth-context";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -133,9 +133,9 @@ export default function RootLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased bg-background text-foreground`}
       >
         <AuthProvider>
-          <SmoothScroll>
+          <ClientSmoothScroll>
             {children}
-          </SmoothScroll>
+          </ClientSmoothScroll>
         </AuthProvider>
         <Analytics />
         <SpeedInsights />

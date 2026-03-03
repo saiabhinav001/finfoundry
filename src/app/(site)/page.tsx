@@ -4,6 +4,8 @@ import { AboutPreview } from "@/components/sections/about-preview";
 import { ProgramsPreview } from "@/components/sections/programs-preview";
 import { EventsPreview } from "@/components/sections/events-preview";
 import { JoinCTA } from "@/components/sections/join-cta";
+import { getAboutData, getEvents, getPrograms } from "@/lib/db";
+import { stats as fallbackStats } from "@/data/site-data";
 
 const websiteJsonLd = {
   "@context": "https://schema.org",
@@ -19,7 +21,13 @@ const websiteJsonLd = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [aboutData, events, programs] = await Promise.all([
+    getAboutData().catch(() => null),
+    getEvents().catch(() => []),
+    getPrograms().catch(() => []),
+  ]);
+
   return (
     <>
       <script
@@ -27,10 +35,10 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
       <HeroSection />
-      <StatsSection />
+      <StatsSection stats={aboutData?.stats ?? fallbackStats} />
       <AboutPreview />
-      <ProgramsPreview />
-      <EventsPreview />
+      <ProgramsPreview programs={programs.length > 0 ? programs : undefined} />
+      <EventsPreview events={events.length > 0 ? events : undefined} />
       <JoinCTA />
     </>
   );

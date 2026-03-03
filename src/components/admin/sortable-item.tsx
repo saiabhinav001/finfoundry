@@ -36,13 +36,13 @@ export function SortableItem({ id, children, className = "" }: SortableItemProps
     <div ref={setNodeRef} style={style} className={`relative ${className}`} {...attributes}>
       <button
         type="button"
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-lg text-muted-foreground/40 hover:text-muted-foreground hover:bg-white/[0.04] cursor-grab active:cursor-grabbing transition-colors duration-200"
+        className="absolute left-1 top-1/2 -translate-y-1/2 z-10 p-2.5 sm:p-1.5 rounded-lg text-muted-foreground/40 hover:text-muted-foreground hover:bg-white/[0.04] cursor-grab active:cursor-grabbing transition-colors duration-200"
         {...listeners}
         aria-label="Drag to reorder"
       >
         <GripVertical className="w-4 h-4" />
       </button>
-      <div className="pl-10">
+      <div className="pl-11 sm:pl-10">
         {children}
       </div>
     </div>
@@ -80,7 +80,7 @@ export function SortableRow({ id, children, className = "" }: SortableRowProps) 
     <div ref={setNodeRef} style={style} className={`flex items-center gap-3 ${className}`} {...attributes}>
       <button
         type="button"
-        className="p-1 rounded-lg text-muted-foreground/40 hover:text-muted-foreground hover:bg-white/[0.04] cursor-grab active:cursor-grabbing transition-colors duration-200 shrink-0"
+        className="p-2 sm:p-1 rounded-lg text-muted-foreground/40 hover:text-muted-foreground hover:bg-white/[0.04] cursor-grab active:cursor-grabbing transition-colors duration-200 shrink-0"
         {...listeners}
         aria-label="Drag to reorder"
       >

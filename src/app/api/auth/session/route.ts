@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { cookies } from "next/headers";
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
+import { invalidateCache } from "@/lib/cache";
 
 const FIVE_DAYS_MS = 60 * 60 * 24 * 5 * 1000;
 
@@ -50,7 +51,10 @@ export async function POST(request: NextRequest) {
         active: true,
         photoURL: decoded.picture || "",
         createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
       });
+      // Bust the admin users cache so the new user appears immediately
+      invalidateCache("users");
     } else {
       const userData = userSnap.data()!;
       role = userData.role || "member";
@@ -67,34 +71,21 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Ensure active field is set for older docs missing it
-      if (userData.active === undefined) {
-        await userRef.update({ active: true });
-      }
-
-      // Sync name, email, and photo from Firebase Auth on every login
-      // This fixes users who signed up before the name-loss bug was fixed,
-      // and keeps profile info current if the user changes their Google name/photo
+      // Sync name, email, photo from Firebase Auth + track lastLogin
+      // Consolidated into a SINGLE Firestore write (was 2-3 separate writes)
       const updates: Record<string, string> = {};
       const authName = decoded.name;
       const authEmail = decoded.email;
       const authPhoto = decoded.picture;
 
-      if (authName && authName !== userData.name) {
-        updates.name = authName;
-      }
-      if (authEmail && authEmail !== userData.email) {
-        updates.email = authEmail;
-      }
-      if (authPhoto && authPhoto !== userData.photoURL) {
-        updates.photoURL = authPhoto;
-      }
-      if (Object.keys(updates).length > 0) {
-        await userRef.update(updates);
-      }
-
-      // Track last login timestamp (1 write, no extra reads)
-      await userRef.update({ lastLogin: new Date().toISOString() });
+      if (authName && authName !== userData.name) updates.name = authName;
+      if (authEmail && authEmail !== userData.email) updates.email = authEmail;
+      if (authPhoto && authPhoto !== userData.photoURL) updates.photoURL = authPhoto;
+      // Always include lastLogin in the same write
+      updates.lastLogin = new Date().toISOString();
+      // Ensure active field is set for older docs missing it
+      if (userData.active === undefined) (updates as Record<string, unknown>).active = true;
+      await userRef.update(updates);
     }
 
     // Embed role in Firebase Auth custom claims so future verifySession()

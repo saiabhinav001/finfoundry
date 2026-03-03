@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -45,17 +44,12 @@ interface ProgramItem {
   icon: string;
 }
 
-export function ProgramsPage() {
-  const [programs, setPrograms] = useState<ProgramItem[]>(staticPrograms);
+interface ProgramsPageProps {
+  programs: ProgramItem[];
+}
 
-  useEffect(() => {
-    fetch("/api/programs")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setPrograms(data);
-      })
-      .catch(() => {});
-  }, []);
+export function ProgramsPage({ programs: serverPrograms }: ProgramsPageProps) {
+  const programs: ProgramItem[] = serverPrograms.length > 0 ? serverPrograms : staticPrograms;
 
   return (
     <>
@@ -80,7 +74,7 @@ export function ProgramsPage() {
               <motion.div
                 key={program.title}
                 variants={fadeUp}
-                className="group glass-card rounded-2xl p-8 transition-all duration-[250ms] ease-out hover:-translate-y-1"
+                className="group glass-card rounded-2xl p-6 sm:p-8 transition-all duration-[250ms] ease-out hover:-translate-y-1"
               >
                 <div className="flex items-start gap-5">
                   <div className="w-12 h-12 rounded-xl neo-icon flex items-center justify-center shrink-0">

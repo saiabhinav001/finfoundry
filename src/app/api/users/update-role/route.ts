@@ -97,6 +97,7 @@ export async function PUT(request: NextRequest) {
     }
 
     await userRef.update({ role: newRole });
+    invalidateCache("users");
 
     // Keep Firebase Auth custom claims in sync so verifySession()
     // returns the correct role without hitting Firestore

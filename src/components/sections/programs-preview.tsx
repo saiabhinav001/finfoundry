@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
@@ -27,17 +26,12 @@ const iconMap: Record<string, React.ElementType> = {
   Building2,
 };
 
-export function ProgramsPreview() {
-  const [programs, setPrograms] = useState(staticPrograms);
+interface ProgramsPreviewProps {
+  programs?: { title: string; description: string; icon: string }[];
+}
 
-  useEffect(() => {
-    fetch("/api/programs")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setPrograms(data);
-      })
-      .catch(() => {});
-  }, []);
+export function ProgramsPreview({ programs: propPrograms }: ProgramsPreviewProps) {
+  const programs = propPrograms ?? staticPrograms;
 
   return (
     <SectionWrapper className="bg-surface" showGlow>

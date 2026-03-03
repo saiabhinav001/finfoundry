@@ -76,7 +76,7 @@ export function PageHero({ badge, title, description }: PageHeroProps) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.35, ease }}
-          className="mt-5 text-lg text-muted-foreground max-w-[52ch] mx-auto leading-relaxed"
+          className="mt-5 text-base sm:text-lg text-muted-foreground max-w-[52ch] mx-auto leading-relaxed"
         >
           {description}
         </motion.p>

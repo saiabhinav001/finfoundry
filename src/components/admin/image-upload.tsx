@@ -226,7 +226,7 @@ export function ImageUpload({
             </div>
 
             {/* Cropper */}
-            <div className="relative w-full" style={{ height: 320 }}>
+            <div className="relative w-full" style={{ height: "min(320px, 50vh)" }}>
               <Cropper
                 image={cropSrc}
                 crop={crop}
@@ -241,10 +241,10 @@ export function ImageUpload({
             </div>
 
             {/* Zoom controls */}
-            <div className="flex items-center justify-center gap-4 px-5 py-3 border-t border-white/[0.06]">
+            <div className="flex items-center justify-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 border-t border-white/[0.06]">
               <button
                 onClick={() => setZoom((z) => Math.max(1, z - 0.2))}
-                className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-colors"
+                className="w-10 h-10 sm:w-8 sm:h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-colors"
               >
                 <ZoomOut className="w-4 h-4" />
               </button>
@@ -255,27 +255,27 @@ export function ImageUpload({
                 step={0.05}
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="w-40 accent-teal"
+                className="flex-1 max-w-[200px] accent-teal"
               />
               <button
                 onClick={() => setZoom((z) => Math.min(3, z + 0.2))}
-                className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-colors"
+                className="w-10 h-10 sm:w-8 sm:h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-colors"
               >
                 <ZoomIn className="w-4 h-4" />
               </button>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-white/[0.06]">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2 sm:gap-3 px-4 sm:px-5 py-4 border-t border-white/[0.06]">
               <button
                 onClick={() => setCropSrc(null)}
-                className="px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all"
+                className="px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCropConfirm}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light transition-colors"
               >
                 <Check className="w-4 h-4" />
                 Crop & Upload

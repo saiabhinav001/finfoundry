@@ -6,6 +6,7 @@ import { Toast, type ToastData } from "@/components/admin/toast";
 import { CustomSelect } from "@/components/admin/custom-select";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { useAuth } from "@/lib/auth-context";
+import { ExpandingSearch } from "@/components/admin/expanding-search";
 import {
   Plus,
   Pencil,
@@ -165,7 +166,7 @@ export function EventsAdminPage() {
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-foreground">Events</h1>
           <p className="text-muted-foreground text-sm mt-1">
@@ -173,11 +174,11 @@ export function EventsAdminPage() {
             {events.length > 0 && <span className="text-foreground/60">{events.length} event{events.length !== 1 ? "s" : ""}</span>}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <a href="/events" target="_blank" rel="noopener noreferrer" className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
             <ExternalLink className="w-4 h-4" /> Preview
           </a>
-          <button onClick={openNew} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light transition-colors duration-200">
+          <button onClick={openNew} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light transition-colors duration-200 w-full sm:w-auto">
             <Plus className="w-4 h-4" /> Add Event
           </button>
         </div>
@@ -237,9 +238,9 @@ export function EventsAdminPage() {
               <ImageUpload value={form.imageURL} folder="events" onChange={(url) => setForm({ ...form, imageURL: url })} />
             </div>
           </div>
-          <div className="flex items-center justify-end gap-3 mt-8">
-            <button onClick={() => setShowForm(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">Cancel</button>
-            <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light disabled:opacity-50 transition-colors duration-200">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 mt-8">
+            <button onClick={() => setShowForm(false)} className="px-5 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 w-full sm:w-auto">Cancel</button>
+            <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light disabled:opacity-50 transition-colors duration-200 w-full sm:w-auto">
               {saving ? "Saving..." : editingId ? "Save Changes" : "Create Event"}
             </button>
           </div>
@@ -248,70 +249,82 @@ export function EventsAdminPage() {
 
       {/* Toolbar */}
       {events.length > 0 && (
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search events..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/40 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
+        <div className="space-y-3 mb-6">
+          {/* Row 1: Search + Select */}
+          <div className="flex items-center gap-3">
+            <ExpandingSearch value={search} onChange={setSearch} placeholder="Search events..." className="flex-1" />
+            {isAdmin && filteredEvents.length > 0 && (
+              <button onClick={toggleSelectAll} className="inline-flex items-center gap-1.5 px-3.5 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06] transition-all duration-200 shrink-0">
+                {selectedIds.size === filteredEvents.length ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
+                {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select"}
+              </button>
+            )}
           </div>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground/50" />
-            {/* Status pills */}
-            <button onClick={() => setFilterStatus("all")} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterStatus === "all" ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>All</button>
-            {EVENT_STATUSES.map((s) => (
-              <button key={s} onClick={() => setFilterStatus(s)} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${filterStatus === s ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>{s}</button>
-            ))}
-          </div>
-          {eventTypes.length > 1 && (
+
+          {/* Row 2: Filter pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Filter className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+
+            {/* Status group */}
             <div className="flex flex-wrap items-center gap-1.5">
-              <button onClick={() => setFilterType("all")} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterType === "all" ? "bg-gold/20 text-gold border border-gold/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>All Types</button>
-              {eventTypes.map((t) => (
-                <button key={t} onClick={() => setFilterType(t)} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterType === t ? "bg-gold/20 text-gold border border-gold/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>{t}</button>
+              <button onClick={() => setFilterStatus("all")} className={`px-3 py-1.5 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 rounded-lg text-xs font-medium transition-colors ${filterStatus === "all" ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>All</button>
+              {EVENT_STATUSES.map((s) => (
+                <button key={s} onClick={() => setFilterStatus(s)} className={`px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium capitalize transition-colors ${filterStatus === s ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>{s}</button>
               ))}
             </div>
-          )}
-          {isAdmin && filteredEvents.length > 0 && (
-            <button onClick={toggleSelectAll} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06] transition-all duration-200 shrink-0">
-              {selectedIds.size === filteredEvents.length ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
-              {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select"}
-            </button>
-          )}
+
+            {/* Divider */}
+            {eventTypes.length > 1 && <div className="hidden sm:block w-px h-5 bg-white/[0.08]" />}
+
+            {/* Type group */}
+            {eventTypes.length > 1 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button onClick={() => setFilterType("all")} className={`px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium transition-colors ${filterType === "all" ? "bg-gold/20 text-gold border border-gold/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>All Types</button>
+                {eventTypes.map((t) => (
+                  <button key={t} onClick={() => setFilterType(t)} className={`px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium transition-colors ${filterType === t ? "bg-gold/20 text-gold border border-gold/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>{t}</button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* Bulk bar */}
       {selectedIds.size > 0 && isAdmin && (
-        <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-red-500/[0.04] border border-red-500/[0.1]">
+        <div className="flex flex-wrap items-center gap-3 mb-4 px-3 py-2.5 sm:p-3 rounded-xl bg-red-500/[0.04] border border-red-500/[0.1]">
           <span className="text-sm text-foreground/80">{selectedIds.size} selected</span>
-          <button onClick={() => setShowBulkConfirm(true)} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm text-red-400 hover:bg-red-500/[0.08] border border-red-500/[0.15] transition-all duration-200">
-            <Trash2 className="w-3.5 h-3.5" /> Delete Selected
-          </button>
-          <button onClick={() => setSelectedIds(new Set())} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Clear</button>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button onClick={() => setShowBulkConfirm(true)} className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-[44px] sm:min-h-0 rounded-lg text-sm text-red-400 hover:bg-red-500/[0.08] border border-red-500/[0.15] transition-all duration-200 flex-1 sm:flex-initial">
+              <Trash2 className="w-3.5 h-3.5" /> Delete Selected
+            </button>
+            <button onClick={() => setSelectedIds(new Set())} className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[44px] sm:min-h-0 px-3 rounded-lg hover:bg-white/[0.04]">Clear</button>
+          </div>
         </div>
       )}
 
       {/* Events List */}
       {loading ? (
-        <div className="text-center py-20">
+        <div className="text-center py-12 sm:py-16 lg:py-20">
           <div className="w-8 h-8 rounded-full border-2 border-teal/30 border-t-teal animate-spin mx-auto mb-3" />
           <p className="text-sm text-muted-foreground">Loading events...</p>
         </div>
       ) : events.length === 0 ? (
-        <div className="text-center py-20 glass-card rounded-2xl">
+        <div className="text-center py-12 sm:py-16 lg:py-20 px-4 sm:px-6 glass-card rounded-2xl">
           <div className="w-16 h-16 rounded-2xl bg-teal/[0.06] flex items-center justify-center mx-auto mb-4"><Calendar className="w-6 h-6 text-teal-light/40" /></div>
           <p className="text-foreground font-medium">No events yet</p>
           <p className="text-muted-foreground/60 text-sm mt-1 mb-4">Create your first event to get started.</p>
-          <button onClick={openNew} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light transition-colors duration-200"><Plus className="w-4 h-4" /> Add First Event</button>
+          <button onClick={openNew} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light transition-colors duration-200 w-full sm:w-auto"><Plus className="w-4 h-4" /> Add First Event</button>
         </div>
       ) : filteredEvents.length === 0 ? (
-        <div className="text-center py-16 glass-card rounded-2xl">
-          <Search className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" /><p className="text-muted-foreground">No events match your filters.</p>
-          <button onClick={() => { setSearch(""); setFilterStatus("all"); setFilterType("all"); }} className="text-teal-light text-sm mt-2 hover:underline">Clear filters</button>
+        <div className="text-center py-10 sm:py-14 lg:py-16 px-4 sm:px-6 glass-card rounded-2xl">
+          <Search className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-muted-foreground">No events match your filters.</p>
+          <button onClick={() => { setSearch(""); setFilterStatus("all"); setFilterType("all"); }} className="text-teal-light text-sm mt-2 hover:underline min-h-[44px] sm:min-h-0 inline-flex items-center">Clear filters</button>
         </div>
       ) : (
         <div className="grid gap-4">
           {filteredEvents.map((event) => (
-            <div key={event.id} className="glass-card rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div key={event.id} className="glass-card rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
               {isAdmin && (
                 <button onClick={() => toggleSelect(event.id || "")} className="shrink-0 text-muted-foreground/40 hover:text-teal-light transition-colors self-start mt-1">
                   {selectedIds.has(event.id || "") ? <CheckSquare className="w-4 h-4 text-teal-light" /> : <Square className="w-4 h-4" />}
@@ -331,15 +344,15 @@ export function EventsAdminPage() {
                 </div>
                 <p className="text-sm text-muted-foreground">{event.date} · {event.type}</p>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => duplicateEvent(event)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200" title="Duplicate">
+              <div className="flex items-center gap-1.5 shrink-0 w-full sm:w-auto border-t border-white/[0.04] sm:border-0 pt-3 sm:pt-0">
+                <button onClick={() => duplicateEvent(event)} className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 sm:w-8 sm:h-8 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-white/[0.06] transition-all duration-200" title="Duplicate">
                   <Copy className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={() => openEdit(event)} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200">
+                <button onClick={() => openEdit(event)} className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-[44px] sm:min-h-0 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200 flex-1 sm:flex-initial">
                   <Pencil className="w-3.5 h-3.5" /> Edit
                 </button>
                 {isAdmin && (
-                  <button onClick={() => setDeleteTarget(event)} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] border border-white/[0.06] transition-all duration-200">
+                  <button onClick={() => setDeleteTarget(event)} className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-[44px] sm:min-h-0 rounded-lg text-sm text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] border border-white/[0.06] transition-all duration-200 flex-1 sm:flex-initial">
                     <Trash2 className="w-3.5 h-3.5" /> Delete
                   </button>
                 )}

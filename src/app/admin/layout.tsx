@@ -51,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Mobile header */}
         <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-[#0a0f1a]/90 backdrop-blur-xl border-b border-white/[0.06]">
           <div className="flex items-center justify-between px-4 py-3">
-            <button onClick={() => setMobileOpen(true)} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all">
+            <button onClick={() => setMobileOpen(true)} className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all">
               <Menu className="w-5 h-5" />
             </button>
             <p className="text-sm font-bold text-foreground">FinFoundry Admin</p>

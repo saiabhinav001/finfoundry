@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
+import { invalidateCache } from "@/lib/cache";
 
 /**
  * POST — One-time bootstrap to create the first super_admin.
@@ -88,6 +89,8 @@ export async function POST(request: NextRequest) {
         createdAt: new Date().toISOString(),
       });
     }
+
+    invalidateCache("users");
 
     return NextResponse.json({
       message:

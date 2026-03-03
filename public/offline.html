@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#050816"/>
+<title>Offline — CBIT FinFoundry</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-x:hidden;background:#050816;font-family:'Inter',system-ui,-apple-system,sans-serif;color:rgba(255,255,255,.9);padding:24px 16px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pulse{0%,100%{opacity:.2}50%{opacity:.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.glow{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 50% 45%,rgba(16,185,129,.06),transparent)}
+.particle{position:fixed;width:4px;height:4px;border-radius:50%;background:rgba(16,185,129,.15);animation:pulse 3s ease-in-out infinite}
+.wrap{position:relative;z-index:1;text-align:center;max-width:420px;width:100%;animation:fadeIn .6s ease}
+
+.icon-box{margin:0 auto 24px;width:72px;height:72px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;animation:slideUp .5s ease,float 4s ease-in-out .5s infinite}
+h1{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:0 0 8px;animation:slideUp .5s ease .15s backwards}
+.desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.6;margin:0 0 24px;animation:slideUp .5s ease .25s backwards}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:8px;border:1px solid rgba(16,185,129,.2);background:rgba(16,185,129,.08);color:rgba(255,255,255,.85);font-weight:500;font-size:13px;cursor:pointer;animation:slideUp .5s ease .35s backwards;transition:background .2s,border-color .2s;font-family:inherit;text-decoration:none}
+.btn:hover{background:rgba(16,185,129,.14);border-color:rgba(16,185,129,.3)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn--home{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.04);animation:slideUp .5s ease .42s backwards}
+.btn--home:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
+
+.btn-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;animation:slideUp .5s ease .35s backwards}
+
+.divider{margin:32px auto 24px;width:48px;height:1px;background:rgba(255,255,255,.06)}
+.sub-label{color:rgba(255,255,255,.25);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}
+
+.game-wrap{text-align:center}
+.score-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px}
+.score{color:#F5C542;font-weight:700;font-size:18px}
+.best{color:rgba(255,255,255,.3);font-size:12px}
+.canvas-wrap{position:relative;display:inline-block}
+#gameCanvas{display:block;width:280px;height:360px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:16px;background:rgba(5,8,22,.85);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.overlay.hidden{display:none}
+.overlay .emoji{font-size:28px;margin-bottom:4px}
+.overlay .title{font-weight:700;font-size:16px;margin:0 0 4px}
+.overlay .info{color:rgba(255,255,255,.4);font-size:12px;margin:0 0 16px}
+.overlay .info b{color:#10B981}
+.overlay .sub-info{color:rgba(255,255,255,.3);font-size:11px;margin:0 0 16px;max-width:200px;line-height:1.4}
+.play-btn{padding:8px 24px;border-radius:8px;border:1px solid rgba(16,185,129,.3);background:rgba(16,185,129,.1);color:#34D399;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;transition:background .2s;-webkit-tap-highlight-color:transparent}
+.play-btn:hover{background:rgba(16,185,129,.2)}
+.play-btn:active{background:rgba(16,185,129,.25)}
+
+.brand{margin-top:32px;display:flex;align-items:center;justify-content:center;gap:8px;color:rgba(255,255,255,.15);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.brand-line{width:24px;height:1px}
+.brand-line--l{background:linear-gradient(to right,transparent,rgba(255,255,255,.1))}
+.brand-line--r{background:linear-gradient(to left,transparent,rgba(255,255,255,.1))}
+.brand .fin{color:rgba(16,185,129,.3)}
+.brand .foundry{color:rgba(245,197,66,.3)}
+</style>
+</head>
+<body>
+
+<!-- Redirect to home if we're actually online (stale SW cache guard) -->
+<script>if(navigator.onLine){window.location.replace("/");}</script>
+
+<div class="glow"></div>
+<div class="particle" style="left:15%;top:20%;animation-delay:0s"></div>
+<div class="particle" style="left:30%;top:45%;animation-delay:.6s"></div>
+<div class="particle" style="left:50%;top:20%;animation-delay:1.2s"></div>
+<div class="particle" style="left:65%;top:70%;animation-delay:1.8s"></div>
+<div class="particle" style="left:78%;top:45%;animation-delay:2.4s"></div>
+<div class="particle" style="left:88%;top:20%;animation-delay:3s"></div>
+
+<div class="wrap">
+  <!-- Wifi-off icon -->
+  <div class="icon-box">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="2" y1="2" x2="22" y2="22"/>
+      <path d="M8.5 16.5a5 5 0 0 1 7 0"/>
+      <path d="M2 8.82a15 15 0 0 1 4.17-2.65"/>
+      <path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"/>
+      <path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"/>
+      <path d="M5 12.86a10 10 0 0 1 5.17-2.87"/>
+      <line x1="12" y1="20" x2="12.01" y2="20"/>
+    </svg>
+  </div>
+
+  <h1>You&rsquo;re Offline</h1>
+  <p class="desc">No internet connection detected. We&rsquo;ll automatically reconnect when you&rsquo;re back online.</p>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button class="btn" id="retryBtn" type="button">
+      <svg id="retryIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      <span id="retryText">Try Again</span>
+    </button>
+    <button class="btn btn--home" id="homeBtn" type="button">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Go Home
+    </button>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider"></div>
+  <p class="sub-label">While you wait&hellip;</p>
+
+  <!-- Coin Game -->
+  <div class="game-wrap">
+    <div class="score-row">
+      <span class="score" id="scoreDisplay">&#x1FA99; 0</span>
+      <span class="best" id="bestDisplay" style="display:none"></span>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="gameCanvas"></canvas>
+      <div class="overlay" id="overlay">
+        <span class="emoji" id="overlayEmoji">&#x1FA99;</span>
+        <p class="title" id="overlayTitle" style="color:rgba(255,255,255,.7)">Catch the Coins!</p>
+        <p class="sub-info" id="overlayInfo">Tap falling coins before they drop. Miss 5 and the market crashes!</p>
+        <button class="play-btn" id="playBtn" type="button">Start Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brand footer -->
+  <div class="brand">
+    <div class="brand-line brand-line--l"></div>
+    <span><span class="fin">Fin</span><span class="foundry">Foundry</span></span>
+    <div class="brand-line brand-line--r"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ═══════════════════════════════════════════════════════════
+   * 1. Online detection — redirect away if we're actually online
+   * ═══════════════════════════════════════════════════════════ */
+  window.addEventListener("online", function(){ window.location.replace("/"); });
+
+  /* ═══════════════════════════════════════════════════════════
+   * 2. Retry + Home buttons
+   * ═══════════════════════════════════════════════════════════ */
+  var retryBtn  = document.getElementById("retryBtn");
+  var retryIcon = document.getElementById("retryIcon");
+  var retryText = document.getElementById("retryText");
+  var homeBtn   = document.getElementById("homeBtn");
+
+  retryBtn.onclick = function(){
+    retryBtn.disabled = true;
+    retryBtn.style.opacity = ".5";
+    retryBtn.style.cursor = "not-allowed";
+    retryIcon.style.animation = "spin 1s linear infinite";
+    retryText.textContent = "Reconnecting\u2026";
+    setTimeout(function(){ window.location.reload(); }, 600);
+  };
+
+  homeBtn.onclick = function(){
+    window.location.href = "/";
+  };
+
+  /* ═══════════════════════════════════════════════════════════
+   * 3. Coin Game — "Catch the Coin" canvas mini-game
+   * ═══════════════════════════════════════════════════════════ */
+  var canvas  = document.getElementById("gameCanvas");
+  var overlay = document.getElementById("overlay");
+  var playBtn = document.getElementById("playBtn");
+  var scoreEl = document.getElementById("scoreDisplay");
+  var bestEl  = document.getElementById("bestDisplay");
+  var oEmoji  = document.getElementById("overlayEmoji");
+  var oTitle  = document.getElementById("overlayTitle");
+  var oInfo   = document.getElementById("overlayInfo");
+
+  /* -- DPI-aware canvas setup --------------------------------
+   * Set internal resolution to match CSS size × devicePixelRatio
+   * so everything is crisp on Retina / high-DPI screens and
+   * click/touch coordinates map 1:1 with drawn coin positions.
+   * --------------------------------------------------------- */
+  var CSS_W = 280, CSS_H = 360;
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width  = CSS_W * dpr;
+  canvas.height = CSS_H * dpr;
+
+  var ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  /* Internal game uses CSS-pixel coordinate space (280×360) */
+  var W = CSS_W, H = CSS_H;
+
+  var coins = [], nextId = 0, score = 0, missed = 0, highScore = 0;
+  var playing = false, raf = 0, spawnTimer = 0;
+
+  /* -- Start / Restart --------------------------------------- */
+  function startGame(){
+    coins = []; nextId = 0; score = 0; missed = 0; spawnTimer = 0;
+    scoreEl.textContent = "\uD83E\uDE99 0";
+    overlay.classList.add("hidden");
+    canvas.style.cursor = "crosshair";
+    playing = true;
+    raf = requestAnimationFrame(loop);
+  }
+
+  /* -- Game Over --------------------------------------------- */
+  function endGame(){
+    playing = false;
+    cancelAnimationFrame(raf);
+    canvas.style.cursor = "default";
+    if(score > highScore) highScore = score;
+    if(highScore > 0){ bestEl.style.display = ""; bestEl.textContent = "Best: " + highScore; }
+    oEmoji.textContent = "\uD83D\uDCC9";
+    oTitle.textContent = "Market Crashed!";
+    oTitle.style.color = "#F5C542";
+    oInfo.style.maxWidth = "";
+    oInfo.style.fontSize = "12px";
+    oInfo.style.color = "rgba(255,255,255,.4)";
+    oInfo.innerHTML = "You caught <b style='color:#10B981'>" + score + "</b> coins";
+    playBtn.textContent = "Play Again";
+    overlay.classList.remove("hidden");
+  }
+
+  /* -- Main loop --------------------------------------------- */
+  function loop(){
+    ctx.clearRect(0, 0, W, H);
+
+    /* Spawn */
+    spawnTimer++;
+    var rate = Math.max(20, 60 - score * 2);
+    if(spawnTimer >= rate){
+      spawnTimer = 0;
+      coins.push({
+        id: nextId++,
+        x: 10 + Math.random() * 80,          /* % from left */
+        speed: 1.5 + Math.random() * 1.5 + score * 0.08,
+        y: -20,
+        caught: false
+      });
+    }
+
+    /* Update + draw */
+    for(var i = 0; i < coins.length; i++){
+      var c = coins[i];
+      if(c.caught) continue;
+      c.y += c.speed;
+
+      var cx = (c.x / 100) * W;
+      var cy = c.y;
+
+      /* Gold coin circle */
+      ctx.beginPath();
+      ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+      ctx.fillStyle = "#F5C542";
+      ctx.fill();
+      ctx.strokeStyle = "#D4A82A";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      /* $ symbol */
+      ctx.fillStyle = "#8B6914";
+      ctx.font = "bold 14px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("$", cx, cy + 1);
+
+      /* Miss detection */
+      if(c.y > H + 20){
+        c.caught = true;
+        missed++;
+        if(missed >= 5) endGame();
+      }
+    }
+
+    /* Compact array — remove caught coins */
+    var j = 0;
+    for(var i = 0; i < coins.length; i++){
+      if(!coins[i].caught) coins[j++] = coins[i];
+    }
+    coins.length = j;
+
+    /* HUD */
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.font = "12px sans-serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText("Missed: " + missed + "/5", 8, 8);
+
+    if(playing) raf = requestAnimationFrame(loop);
+  }
+
+  /* -- Hit test ---------------------------------------------- */
+  function hitTest(px, py, radius){
+    for(var i = 0; i < coins.length; i++){
+      var c = coins[i];
+      if(c.caught) continue;
+      var cx = (c.x / 100) * W;
+      var cy = c.y;
+      var dx = px - cx, dy = py - cy;
+      if(dx * dx + dy * dy < radius * radius){
+        c.caught = true;
+        score++;
+        scoreEl.textContent = "\uD83E\uDE99 " + score;
+        return;
+      }
+    }
+  }
+
+  /* -- Translate event coords to game coords ----------------- */
+  function getGameCoords(clientX, clientY){
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left) * (W / rect.width),
+      y: (clientY - rect.top)  * (H / rect.height)
+    };
+  }
+
+  /* -- Mouse click ------------------------------------------- */
+  canvas.addEventListener("click", function(e){
+    if(!playing) return;
+    var p = getGameCoords(e.clientX, e.clientY);
+    hitTest(p.x, p.y, 22);
+  });
+
+  /* -- Touch ------------------------------------------------- */
+  canvas.addEventListener("touchstart", function(e){
+    if(!playing) return;
+    e.preventDefault();
+    var t = e.touches[0];
+    var p = getGameCoords(t.clientX, t.clientY);
+    hitTest(p.x, p.y, 30);
+  }, {passive: false});
+
+  /* -- Play button ------------------------------------------- */
+  playBtn.onclick = function(e){
+    e.stopPropagation();
+    startGame();
+  };
+
+})();
+</script>
+</body>
+</html>

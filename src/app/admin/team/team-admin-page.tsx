@@ -20,6 +20,8 @@ import { SortableItem } from "@/components/admin/sortable-item";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Toast, type ToastData } from "@/components/admin/toast";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { ExpandingSearch } from "@/components/admin/expanding-search";
+import { CustomSelect } from "@/components/admin/custom-select";
 import { useAuth } from "@/lib/auth-context";
 import {
   Plus,
@@ -229,7 +231,7 @@ export function TeamAdminPage() {
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-foreground">Team</h1>
           <p className="text-muted-foreground text-sm mt-1">
@@ -237,11 +239,11 @@ export function TeamAdminPage() {
             {members.length > 0 && <span className="text-foreground/60">{members.length} member{members.length !== 1 ? "s" : ""}</span>}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <a href="/team" target="_blank" rel="noopener noreferrer" className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
             <ExternalLink className="w-4 h-4" /> Preview
           </a>
-          <button onClick={openNew} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light transition-colors duration-200">
+          <button onClick={openNew} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light transition-colors duration-200 w-full sm:w-auto">
             <Plus className="w-4 h-4" /> Add Member
           </button>
         </div>
@@ -279,12 +281,15 @@ export function TeamAdminPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Category</label>
-              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as TeamCategory })}
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200 appearance-none">
-                <option value="core_committee" className="bg-[#0a0f1c]">Core Committee</option>
-                <option value="team_head" className="bg-[#0a0f1c]">Team Head</option>
-                <option value="member" className="bg-[#0a0f1c]">Member</option>
-              </select>
+              <CustomSelect
+                value={form.category}
+                options={[
+                  { value: "core_committee", label: "Core Committee" },
+                  { value: "team_head", label: "Team Head" },
+                  { value: "member", label: "Member" },
+                ]}
+                onChange={(val) => setForm({ ...form, category: val as TeamCategory })}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Visibility</label>
@@ -303,9 +308,9 @@ export function TeamAdminPage() {
               <ImageUpload value={form.image} folder="team" onChange={(url) => setForm({ ...form, image: url })} />
             </div>
           </div>
-          <div className="flex items-center justify-end gap-3 mt-8">
-            <button onClick={() => setShowForm(false)} className="px-5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">Cancel</button>
-            <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light disabled:opacity-50 transition-colors duration-200">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 mt-8">
+            <button onClick={() => setShowForm(false)} className="px-5 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200 w-full sm:w-auto">Cancel</button>
+            <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 min-h-[44px] sm:min-h-0 rounded-xl bg-teal text-white text-sm font-semibold hover:bg-teal-light disabled:opacity-50 transition-colors duration-200 w-full sm:w-auto">
               {saving ? "Saving..." : editingId ? "Save Changes" : "Add Member"}
             </button>
           </div>
@@ -315,27 +320,23 @@ export function TeamAdminPage() {
       {/* Toolbar */}
       {members.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name, role, or batch..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/40 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
-          </div>
+          <ExpandingSearch value={search} onChange={setSearch} placeholder="Search by name, role, or batch..." className="flex-1" />
           {batches.length > 1 && (
             <div className="flex flex-wrap items-center gap-1.5">
               <Filter className="w-3.5 h-3.5 text-muted-foreground/50" />
-              <button onClick={() => setFilterBatch("all")} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterBatch === "all" ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>All</button>
+              <button onClick={() => setFilterBatch("all")} className={`px-2.5 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium transition-colors ${filterBatch === "all" ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>All</button>
               {batches.map((b) => (
-                <button key={b} onClick={() => setFilterBatch(b)} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterBatch === b ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>{b}</button>
+                <button key={b} onClick={() => setFilterBatch(b)} className={`px-2.5 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium transition-colors ${filterBatch === b ? "bg-teal/20 text-teal-light border border-teal/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>{b}</button>
               ))}
             </div>
           )}
           <div className="flex flex-wrap items-center gap-1.5">
             {[{ key: "all", label: "All Roles" }, { key: "core_committee", label: "Core Committee" }, { key: "team_head", label: "Team Head" }, { key: "member", label: "Member" }].map(({ key, label }) => (
-              <button key={key} onClick={() => setFilterCategory(key)} className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${filterCategory === key ? "bg-gold/20 text-gold border border-gold/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>{label}</button>
+              <button key={key} onClick={() => setFilterCategory(key)} className={`px-2.5 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium transition-colors ${filterCategory === key ? "bg-gold/20 text-gold border border-gold/30" : "text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06]"}`}>{label}</button>
             ))}
           </div>
           {isAdmin && filteredMembers.length > 0 && (
-            <button onClick={toggleSelectAll} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06] transition-all duration-200 shrink-0">
+            <button onClick={toggleSelectAll} className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground bg-white/[0.03] border border-white/[0.06] transition-all duration-200 shrink-0">
               {selectedIds.size === filteredMembers.length ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5" />}
               {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select"}
             </button>
@@ -345,12 +346,12 @@ export function TeamAdminPage() {
 
       {/* Bulk bar */}
       {selectedIds.size > 0 && isAdmin && (
-        <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-red-500/[0.04] border border-red-500/[0.1]">
+        <div className="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-xl bg-red-500/[0.04] border border-red-500/[0.1]">
           <span className="text-sm text-foreground/80">{selectedIds.size} selected</span>
-          <button onClick={() => setShowBulkConfirm(true)} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm text-red-400 hover:bg-red-500/[0.08] border border-red-500/[0.15] transition-all duration-200">
+          <button onClick={() => setShowBulkConfirm(true)} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-sm text-red-400 hover:bg-red-500/[0.08] border border-red-500/[0.15] transition-all duration-200">
             <Trash2 className="w-3.5 h-3.5" /> Delete Selected
           </button>
-          <button onClick={() => setSelectedIds(new Set())} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Clear</button>
+          <button onClick={() => setSelectedIds(new Set())} className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[44px] sm:min-h-0 px-2">Clear</button>
         </div>
       )}
 
@@ -437,16 +438,16 @@ function MemberCard({ member, isAdmin, isSelected, onToggleSelect, onEdit, onDel
           <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium border ${categoryColor}`}>{categoryLabel}</span>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <button onClick={onToggleVisibility} title={isHidden ? "Show on website" : "Hide from website"} className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs transition-all duration-200 border ${isHidden ? "text-muted-foreground hover:text-teal-light hover:bg-teal/[0.04] border-white/[0.06]" : "text-teal-light/70 hover:text-muted-foreground hover:bg-white/[0.04] border-white/[0.06]"}`}>
+      <div className="flex items-center gap-2 flex-wrap">
+        <button onClick={onToggleVisibility} title={isHidden ? "Show on website" : "Hide from website"} className={`inline-flex items-center gap-1 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs transition-all duration-200 border ${isHidden ? "text-muted-foreground hover:text-teal-light hover:bg-teal/[0.04] border-white/[0.06]" : "text-teal-light/70 hover:text-muted-foreground hover:bg-white/[0.04] border-white/[0.06]"}`}>
           {isHidden ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
           {isHidden ? "Show" : "Hide"}
         </button>
-        <button onClick={onEdit} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200">
+        <button onClick={onEdit} className="inline-flex items-center gap-1 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-white/[0.06] transition-all duration-200">
           <Pencil className="w-3 h-3" /> Edit
         </button>
         {isAdmin && (
-          <button onClick={onDelete} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] border border-white/[0.06] transition-all duration-200">
+          <button onClick={onDelete} className="inline-flex items-center gap-1 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] border border-white/[0.06] transition-all duration-200">
             <Trash2 className="w-3 h-3" /> Remove
           </button>
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { JoinCTA } from "@/components/sections/join-cta";
@@ -19,29 +19,17 @@ interface TeamMember {
   category?: "core_committee" | "team_head" | "member";
 }
 
-export function TeamPage() {
-  const [members, setMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeBatch, setActiveBatch] = useState<string>("");
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+interface TeamPageProps {
+  members: TeamMember[];
+}
 
-  useEffect(() => {
-    fetch("/api/team")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setMembers(data);
-          // Default to the latest batch
-          const batches = [...new Set(data.map((m: TeamMember) => m.batch).filter(Boolean))] as string[];
-          if (batches.length > 0) {
-            batches.sort((a, b) => b.localeCompare(a));
-            setActiveBatch(batches[0]);
-          }
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+export function TeamPage({ members }: TeamPageProps) {
+  const [activeBatch, setActiveBatch] = useState<string>(() => {
+    const batches = [...new Set(members.map((m) => m.batch).filter(Boolean) as string[])];
+    batches.sort((a, b) => b.localeCompare(a));
+    return batches[0] || "";
+  });
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
   // Extract unique batches sorted descending (latest first)
   const batches = useMemo(() => {
@@ -98,7 +86,7 @@ export function TeamPage() {
               <button
                 key={batch}
                 onClick={() => setActiveBatch(batch)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                className={`px-5 py-2.5 sm:py-2 rounded-full text-sm font-medium transition-all duration-200 min-h-[44px] sm:min-h-0 ${
                   activeBatch === batch
                     ? "filter-pill filter-pill-active"
                     : "filter-pill"
@@ -111,7 +99,7 @@ export function TeamPage() {
         )}
 
         {/* Category filter tabs — shown when multiple categories exist */}
-        {!loading && availableCategories.length > 1 && (
+        {availableCategories.length > 1 && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -121,7 +109,7 @@ export function TeamPage() {
           >
             <button
               onClick={() => setActiveCategory("all")}
-              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+              className={`px-4 py-2 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 min-h-[44px] sm:min-h-0 ${
                 activeCategory === "all" ? "filter-pill filter-pill-active" : "filter-pill"
               }`}
             >
@@ -137,7 +125,7 @@ export function TeamPage() {
                 <button
                   key={cat.key}
                   onClick={() => setActiveCategory(cat.key)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                  className={`px-4 py-2 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 min-h-[44px] sm:min-h-0 ${
                     activeCategory === cat.key ? "filter-pill filter-pill-active" : "filter-pill"
                   }`}
                 >
@@ -147,21 +135,8 @@ export function TeamPage() {
           </motion.div>
         )}
 
-        {/* Loading skeleton */}
-        {loading && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="glass-card rounded-2xl p-5 animate-pulse">
-                <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/[0.04] mb-4" />
-                <div className="h-4 bg-white/[0.04] rounded-lg w-3/4 mx-auto mb-2" />
-                <div className="h-3 bg-white/[0.04] rounded-lg w-1/2 mx-auto" />
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Empty state */}
-        {!loading && members.length === 0 && (
+        {members.length === 0 && (
           <motion.div
             variants={fadeUp}
             initial="hidden"
@@ -182,7 +157,7 @@ export function TeamPage() {
         )}
 
         {/* Team grid */}
-        {!loading && filteredMembers.length > 0 && (
+        {filteredMembers.length > 0 && (
           <>
             {/* Batch heading + member count */}
             <div className="flex items-center justify-between mb-8">
@@ -218,7 +193,7 @@ export function TeamPage() {
                     animate="visible"
                     exit={{ opacity: 0, transition: { duration: 0.15 } }}
                     viewport={viewport}
-                    className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6"
+                    className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6"
                   >
                     {group.members.map((member) => (
                       <motion.div

@@ -129,16 +129,16 @@ export function AboutAdminPage() {
     <div>
       <Toast toast={toast} onDismiss={() => setToast(null)} />
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-heading font-bold text-2xl text-foreground">About Page</h1>
           <p className="text-muted-foreground text-sm mt-1">Edit the About page content shown on the website.{isDirty && <span className="text-gold ml-2">● Unsaved changes</span>}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <a href="/about" target="_blank" rel="noopener noreferrer" className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-white/[0.06] hover:bg-white/[0.04] transition-all duration-200">
             <ExternalLink className="w-4 h-4" /> Preview
           </a>
-          <button onClick={handleSave} disabled={saving} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light disabled:opacity-50 transition-colors duration-200">
+          <button onClick={handleSave} disabled={saving} className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-gold text-background text-sm font-semibold hover:bg-gold-light disabled:opacity-50 transition-colors duration-200 w-full sm:w-auto">
             <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save All"}
           </button>
         </div>
@@ -148,7 +148,7 @@ export function AboutAdminPage() {
       <div className="glass-card rounded-2xl p-6 md:p-8 mb-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-heading font-semibold text-lg text-foreground flex items-center gap-2"><Info className="w-4 h-4 text-teal-light" /> Mission Statement</h2>
-          <button onClick={() => { setMission([...mission, ""]); markDirty(); }} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all duration-200"><Plus className="w-3 h-3" /> Add Paragraph</button>
+          <button onClick={() => { setMission([...mission, ""]); markDirty(); }} className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all duration-200"><Plus className="w-3 h-3" /> Add Paragraph</button>
         </div>
         <div className="space-y-3">
           {mission.map((p, i) => (
@@ -165,16 +165,16 @@ export function AboutAdminPage() {
       <div className="glass-card rounded-2xl p-6 md:p-8 mb-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-heading font-semibold text-lg text-foreground">By the Numbers</h2>
-          <button onClick={() => { setAboutStats([...aboutStats, { value: "", label: "" }]); markDirty(); }} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all duration-200"><Plus className="w-3 h-3" /> Add Stat</button>
+          <button onClick={() => { setAboutStats([...aboutStats, { value: "", label: "" }]); markDirty(); }} className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all duration-200"><Plus className="w-3 h-3" /> Add Stat</button>
         </div>
         <div className="space-y-3">
           {aboutStats.map((s, i) => (
-            <div key={i} className="flex items-center gap-3">
+            <div key={i} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
               <input value={s.value} onChange={(e) => { setAboutStats(aboutStats.map((st, idx) => idx === i ? { ...st, value: e.target.value } : st)); markDirty(); }} placeholder="e.g. 500+"
-                className="w-32 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
+                    className="w-full sm:w-32 px-3 sm:px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
               <input value={s.label} onChange={(e) => { setAboutStats(aboutStats.map((st, idx) => idx === i ? { ...st, label: e.target.value } : st)); markDirty(); }} placeholder="e.g. Members"
-                className="flex-1 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
-              <button onClick={() => { setAboutStats(aboutStats.filter((_, idx) => idx !== i)); markDirty(); }} className="p-2.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/[0.06] transition-all duration-200"><Trash2 className="w-4 h-4" /></button>
+                className="w-full sm:flex-1 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
+              <button onClick={() => { setAboutStats(aboutStats.filter((_, idx) => idx !== i)); markDirty(); }} className="p-2.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/[0.06] transition-all duration-200 self-end sm:self-auto"><Trash2 className="w-4 h-4" /></button>
             </div>
           ))}
         </div>
@@ -184,7 +184,7 @@ export function AboutAdminPage() {
       <div className="glass-card rounded-2xl p-6 md:p-8 mb-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-heading font-semibold text-lg text-foreground">Our Values</h2>
-          <button onClick={() => { setValues([...values, { title: "", description: "" }]); markDirty(); }} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all duration-200"><Plus className="w-3 h-3" /> Add Value</button>
+          <button onClick={() => { setValues([...values, { title: "", description: "" }]); markDirty(); }} className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all duration-200"><Plus className="w-3 h-3" /> Add Value</button>
         </div>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleValueDragEnd}>
           <SortableContext items={values.map((_, i) => `value-${i}`)} strategy={verticalListSortingStrategy}>
@@ -209,18 +209,20 @@ export function AboutAdminPage() {
       <div className="glass-card rounded-2xl p-6 md:p-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-heading font-semibold text-lg text-foreground">Timeline Milestones</h2>
-          <button onClick={() => { setMilestones([...milestones, { year: "", event: "" }]); markDirty(); }} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all duration-200"><Plus className="w-3 h-3" /> Add Milestone</button>
+          <button onClick={() => { setMilestones([...milestones, { year: "", event: "" }]); markDirty(); }} className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-xs font-medium text-teal-light hover:bg-teal/[0.06] border border-white/[0.06] transition-all duration-200"><Plus className="w-3 h-3" /> Add Milestone</button>
         </div>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleMilestoneDragEnd}>
           <SortableContext items={milestones.map((_, i) => `milestone-${i}`)} strategy={verticalListSortingStrategy}>
             <div className="space-y-3">
               {milestones.map((m, i) => (
                 <SortableRow key={`milestone-${i}`} id={`milestone-${i}`}>
-                  <input value={m.year} onChange={(e) => { setMilestones(milestones.map((ms, idx) => idx === i ? { ...ms, year: e.target.value } : ms)); markDirty(); }} placeholder="2024"
-                    className="w-24 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
-                  <input value={m.event} onChange={(e) => { setMilestones(milestones.map((ms, idx) => idx === i ? { ...ms, event: e.target.value } : ms)); markDirty(); }} placeholder="Milestone description"
-                    className="flex-1 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
-                  <button onClick={() => { setMilestones(milestones.filter((_, idx) => idx !== i)); markDirty(); }} className="p-2.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/[0.06] transition-all duration-200"><Trash2 className="w-4 h-4" /></button>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-1">
+                    <input value={m.year} onChange={(e) => { setMilestones(milestones.map((ms, idx) => idx === i ? { ...ms, year: e.target.value } : ms)); markDirty(); }} placeholder="2024"
+                      className="w-full sm:w-24 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
+                    <input value={m.event} onChange={(e) => { setMilestones(milestones.map((ms, idx) => idx === i ? { ...ms, event: e.target.value } : ms)); markDirty(); }} placeholder="Milestone description"
+                      className="w-full sm:flex-1 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-teal/30 focus:ring-1 focus:ring-teal/15 transition-colors duration-200"/>
+                  </div>
+                  <button onClick={() => { setMilestones(milestones.filter((_, idx) => idx !== i)); markDirty(); }} className="p-2.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/[0.06] transition-all duration-200 self-end sm:self-auto"><Trash2 className="w-4 h-4" /></button>
                 </SortableRow>
               ))}
             </div>

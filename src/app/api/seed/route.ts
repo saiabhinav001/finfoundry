@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { verifySession } from "@/lib/firebase/auth-helpers";
 import { FieldValue } from "firebase-admin/firestore";
+import { invalidateCache } from "@/lib/cache";
 
 /**
  * POST — Seed Firestore with the static site-data content.
@@ -270,6 +271,9 @@ export async function POST(request: NextRequest) {
         message: "All collections already have data. Nothing to seed.",
       });
     }
+
+    // Bust cache for all seeded collections
+    invalidateCache("events", "programs", "team", "team_all", "resources");
 
     return NextResponse.json({
       message: `Seeded: ${seeded.join(", ")}. You can now edit this content in the Admin Panel.`,

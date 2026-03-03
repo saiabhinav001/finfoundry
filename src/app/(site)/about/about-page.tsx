@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -53,26 +52,21 @@ const staticAboutStats = [
   { value: "3+", label: "Years" },
 ];
 
-export function AboutPage() {
-  const [values, setValues] = useState(staticValues);
-  const [milestones, setMilestones] = useState(staticMilestones);
-  const [mission, setMission] = useState(staticMission);
-  const [aboutStats, setAboutStats] = useState(staticAboutStats);
+interface AboutPageProps {
+  data: {
+    values?: { title: string; description: string }[] | null;
+    milestones?: { year: string; event: string }[] | null;
+    mission?: string[] | null;
+    stats?: { value: string; label: string }[] | null;
+  } | null;
+}
 
-  useEffect(() => {
-    fetch("/api/about")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.values && Array.isArray(data.values)) setValues(data.values);
-        if (data.milestones && Array.isArray(data.milestones))
-          setMilestones(data.milestones);
-        if (data.mission && Array.isArray(data.mission))
-          setMission(data.mission);
-        if (data.stats && Array.isArray(data.stats))
-          setAboutStats(data.stats);
-      })
-      .catch(() => {});
-  }, []);
+export function AboutPage({ data }: AboutPageProps) {
+  const values = data?.values?.length ? data.values : staticValues;
+  const milestones = data?.milestones?.length ? data.milestones : staticMilestones;
+  const mission = data?.mission?.length ? data.mission : staticMission;
+  const aboutStats = data?.stats?.length ? data.stats : staticAboutStats;
+
   return (
     <>
       <PageHero
@@ -157,7 +151,7 @@ export function AboutPage() {
             <motion.div
               key={value.title}
               variants={fadeUp}
-              className="glass-card rounded-2xl p-7"
+              className="glass-card rounded-2xl p-5 sm:p-7"
             >
               <div className="w-10 h-10 rounded-xl neo-icon flex items-center justify-center mb-5">
                 <span className="text-teal-light/80 font-heading font-bold text-sm">

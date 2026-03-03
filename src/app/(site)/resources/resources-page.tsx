@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { SectionWrapper } from "@/components/shared/section-wrapper";
 import { resources as staticResources } from "@/data/site-data";
@@ -27,17 +26,12 @@ interface ResourceCategory {
   items: ResourceItem[];
 }
 
-export function ResourcesPage() {
-  const [resources, setResources] = useState<ResourceCategory[]>(staticResources);
+interface ResourcesPageProps {
+  resources: ResourceCategory[];
+}
 
-  useEffect(() => {
-    fetch("/api/resources")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setResources(data);
-      })
-      .catch(() => {});
-  }, []);
+export function ResourcesPage({ resources: serverResources }: ResourcesPageProps) {
+  const resources: ResourceCategory[] = serverResources.length > 0 ? serverResources : staticResources;
 
   return (
     <>
@@ -80,7 +74,7 @@ export function ResourcesPage() {
                 <motion.div
                   key={item.title}
                   variants={fadeUp}
-                  className="group glass-card rounded-2xl p-7 transition-all duration-[250ms] ease-out hover:-translate-y-1"
+                  className="group glass-card rounded-2xl p-5 sm:p-7 transition-all duration-[250ms] ease-out hover:-translate-y-1"
                 >
                   <h3 className="font-heading font-semibold text-[17px] text-foreground mb-1 tracking-[-0.01em]">
                     {item.title}

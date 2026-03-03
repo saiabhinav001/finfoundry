@@ -1,11 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "framer-motion";
 import { HiArrowRight } from "react-icons/hi";
 import { useEntrance } from "@/lib/entrance-context";
-import { ParticleNetwork } from "@/components/shared/particle-network";
 import { MagneticButton } from "@/components/shared/magnetic-button";
+
+/* Heavy canvas component — lazy-load, no SSR */
+const ParticleNetwork = dynamic(
+  () => import("@/components/shared/particle-network").then((m) => m.ParticleNetwork),
+  { ssr: false }
+);
 
 /* ═══════════════════════════════════════════════════════════════ */
 /*  HERO — Content-first. Clean background, no glow artifacts.  */
@@ -99,7 +105,7 @@ export function HeroSection() {
         {/* Heading — Word-by-word reveal */}
         <motion.h1
           variants={fadeUp}
-          className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-[80px] font-bold tracking-[-0.03em] leading-[1.08] max-w-4xl mx-auto"
+          className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[80px] font-bold tracking-[-0.03em] leading-[1.08] max-w-4xl mx-auto"
         >
           <motion.span
             className="inline"

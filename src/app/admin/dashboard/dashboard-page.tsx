@@ -94,7 +94,7 @@ export function DashboardPage() {
     <div>
       {/* Welcome */}
       <div className="mb-8">
-        <h1 className="font-heading font-bold text-2xl text-foreground">{greeting()}{user?.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}!</h1>
+        <h1 className="font-heading font-bold text-2xl text-foreground">{greeting()}{user?.displayName ? `, ${user.displayName.split(" ")[0]}` : user?.email ? `, ${user.email.split("@")[0]}` : ""}!</h1>
         <p className="text-muted-foreground text-sm mt-1">Here&apos;s an overview of your FinFoundry dashboard.</p>
       </div>
 
@@ -104,7 +104,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" data-tour="stat-cards">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" data-tour="stat-cards">
         {statCards.map(({ key, label, icon: Icon, href, color }) => (
           <Link key={key} href={href} className={`glass-card rounded-2xl p-5 border bg-gradient-to-br ${color} group hover:scale-[1.02] transition-all duration-200`}>
             <div className="flex items-center justify-between mb-3">
@@ -168,7 +168,7 @@ export function DashboardPage() {
       {/* Quick Links */}
       <div className="mt-8 glass-card rounded-2xl p-6">
         <h2 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-teal-light/60" /> Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[
             { label: "Create Event", href: "/admin/events", icon: Plus, accent: true },
             { label: "View Messages", href: "/admin/messages", icon: MessageSquare, badge: stats?.unreadMessages },
@@ -193,11 +193,11 @@ export function DashboardPage() {
               </>
             );
             return link.external ? (
-              <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 p-3 rounded-xl border text-sm transition-all duration-200 ${cls}`}>
+              <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 p-3 rounded-xl border text-xs sm:text-sm min-h-[44px] transition-all duration-200 ${cls}`}>
                 {inner}
               </a>
             ) : (
-              <Link key={link.label} href={link.href} className={`flex items-center gap-2 p-3 rounded-xl border text-sm transition-all duration-200 ${cls}`}>
+              <Link key={link.label} href={link.href} className={`flex items-center gap-2 p-3 rounded-xl border text-xs sm:text-sm min-h-[44px] transition-all duration-200 ${cls}`}>
                 {inner}
               </Link>
             );
